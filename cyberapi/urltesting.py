@@ -13,7 +13,9 @@ import datetime
 from time import strftime
 
 #todo add destroy for the filter options. so that they get destroyed upon new search and reset the checkbox to unchecked
-#todo deactivate the search button untill text has been entered into the search box.
+
+
+
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -49,7 +51,7 @@ class cyberapi(Tk):
         self.title(newTitle)
 
 
-# noinspection PyMandatoryEncoding,PyMissingOrEmptyDocstring
+    # noinspection PyMandatoryEncoding,PyMissingOrEmptyDocstring
 class Welcome(Frame):
 
     def __init__(self, parent, controller):
@@ -70,7 +72,6 @@ class Welcome(Frame):
         self.var = IntVar()
         self.check_filter = Checkbutton(self, text="Advanced Filter", variable=self.var, command= self.filter_op)
 
-
         #Formatting of the window
         self.but_titlesearch.grid(column=1, row =1,columnspan=2)
         self.but_titlebodysearch.grid(column=1, row=2, columnspan=2)
@@ -88,9 +89,9 @@ class Welcome(Frame):
             self.fsub_label = Label(self, text='Subjectivity: ')
             self.var2 = IntVar()
             self.var2.set(1)
-            self.fsub_nv = Radiobutton(self, text ='Null', variable=self.var2, value=1, command=self.rbselection)
-            self.fsub_gt = Radiobutton(self, text='GreaterThan', variable=self.var2, value=2, command=self.rbselection)
-            self.fsub_lt = Radiobutton(self, text='LessThan', variable=self.var2, value=3, command=self.rbselection)
+            self.fsub_nv = Radiobutton(self, text ='Null', variable=self.var2, value=1)
+            self.fsub_gt = Radiobutton(self, text='GreaterThan', variable=self.var2, value=2)
+            self.fsub_lt = Radiobutton(self, text='LessThan', variable=self.var2, value=3)
             self.fD_label = Label(self, text='Date: ')
             self.fD_format = Label(self, text='00/00/0000')
             self.fD_format.configure(foreground='grey')
@@ -101,6 +102,8 @@ class Welcome(Frame):
             self.fD_ent2 = Entry(self, width=10, bd=2)
             self.fD_ent2.insert('end', strftime('%m/%d/%Y'))
             #print(strftime('%m-%d-%Y'))
+
+
             #window placements
             self.fauthor_label.grid(column=1, row=6, sticky='w')
             self.fauthor_entry.grid(column=2, row=6, sticky='W')
@@ -129,13 +132,12 @@ class Welcome(Frame):
             self.fD_beinlab.destroy()
             self.fD_endlab.destroy()
             self.fD_ent2.destroy()
-    #todo radio button selection for the greater less than options of filter search
-    def rbselection(self):
-        print('hi')
-
 
     #search by title
     def tkwsearch(self):
+        if self.var.get():
+            self.var.set(0)
+            self.filter_op()
         #check to see if the lables and entry boxes exist from a previous search options
         #if they do then destroy them then create the new search label and entry box
         if hasattr(self, 'titlelabel'):
@@ -160,10 +162,11 @@ class Welcome(Frame):
             self.but_search.destroy()
 
         self.ent_title = Entry(self, width=30, bd=2)
+        self.ent_title.bind('<Return>', self.enableSearch)
         self.titlelabel = Label(self, text='Title')
-
-        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
+        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
                                                                                   + self.ent_title.get()))
+
         #http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='string'
         #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
 
@@ -172,8 +175,11 @@ class Welcome(Frame):
         self.ent_title.grid(column=4, row=1)
         self.but_search.grid(column=5, row=1)
 
-#search by title&body todo write url path for getting keyword from body and title
+    #search by title&body
     def tbssearch(self):
+        if self.var.get():
+            self.var.set(0)
+            self.filter_op()
         #check to see if the lables and entry boxes exist from a previous search options
         #if they do then destroy them then create the new search label and entry box
         if hasattr(self, 'titlelabel'):
@@ -200,10 +206,9 @@ class Welcome(Frame):
         self.titlelabel = Label(self, text='Title')
         self.bodylabel = Label(self, text='Body')
         self.ent_body = Entry(self, width=30, bd=2)
-#todo search body and title
-        self.but_search = Button(self, text='Search',command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
+        self.ent_body.bind('<Return>', self.enableSearch)
+        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
                                                                                   + self.ent_title.get()+'&body=' + self.ent_body.get()))
-
         #window placments
         self.titlelabel.grid(column=3, row=1)
         self.bodylabel.grid(column=3, row =2)
@@ -212,6 +217,9 @@ class Welcome(Frame):
         self.but_search.grid(column=5, row=1)
     #search by uri
     def urisearch(self):
+        if self.var.get():
+            self.var.set(0)
+            self.filter_op()
         #check to see if the lables and entry boxes exist from a previous search options
         #if they do then destroy them then create the new search label and entry box
         if hasattr(self, 'titlelabel'):
@@ -235,8 +243,9 @@ class Welcome(Frame):
             self.ent_edate.destroy()
             self.but_search.destroy()
         self.ent_uri = Entry(self, width=30, bd=2)
+        self.ent_uri.bind('<Return>', self.enableSearch)
         self.urilabel = Label(self, text="URI")
-        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='
+        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='
                                                                                    + self.ent_uri.get()))
         #http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='string'
         #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
@@ -246,8 +255,11 @@ class Welcome(Frame):
         self.ent_uri.grid(column=4, row=1)
         self.but_search.grid(column=5, row=1)
 
-    #search by Date todo  change path to $elt regex to check if dates are = then subtract from start date 1
+    #search by Date
     def sbdsearch(self):
+        if self.var.get():
+            self.var.set(0)
+            self.filter_op()
         #check to see if the lables and entry boxes exist from a previous search options
         #if they do then destroy them then create the new search label and entry box
         if hasattr(self, 'titlelabel'):
@@ -278,7 +290,8 @@ class Welcome(Frame):
         self.datelabelex.configure(foreground='grey')
         self.ent_date = Entry(self, width=10, bd=2)
         self.ent_edate = Entry(self, width=10, bd=2)
-        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='
+        self.ent_edate.bind('<Return>', self.enableSearch)
+        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='
                                                                                   + self.ent_date.get()+'&zdate='+self.ent_edate.get()))
         #http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='00/00/0000'&zdate='00/00/0000
         #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
@@ -297,13 +310,14 @@ class Welcome(Frame):
         if hasattr(self, 'fauthor_entry'):
             au = self.fauthor_entry.get()
             au = au.replace(' ', '')
+            #var2 is the state of the radio check button
             if self.var2.get() == 2:
-                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate=4/20/2017'
+                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate='+self.fD_ent2.get()
                 print(url)
             elif self.var2.get() == 3:
-                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate=4/20/2017'
+                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate='+self.fD_ent2.get()
             else:
-                url = url + '&author=' + au + '&sub=&sdate=' + self.fD_ent.get()+'&edate=4/20/2017'
+                url = url + '&author=' + au + '&sub=&sdate=' + self.fD_ent.get()+'&edate='+self.fD_ent2.get()
         else:
             url = url+'&author=&sub=&sdate=01/01/0001&edate='+strftime('%m/%d/%Y')
             print(url)
@@ -345,18 +359,18 @@ class Welcome(Frame):
         articledate.grid(column=3, row=4, sticky='W')
         topics.grid(column=4, row=4)
 
-#op_link "double click on the link at the top of the page opens up the url link
+
+
+    #op_link "double click on the link at the top of the page opens up the url link
     def op_link(self, event):
         webbrowser.open_new(self.n[0])
+    #event bind when Return is entered after a title keyword is entered will enable the search button.
+    def enableSearch(self, event):
+        self.but_search.configure(state='normal')
 
 
 
-#todo ---------junk-------------------------
-    def about(self):
-        messagebox.showinfo("About", "Chase Brown")  # messagebox when File<About.? is selected
 
-    def start(self):
-        self.controller.show_frame("MainMenu")  # opens up the next window mainmenu
 
 #todo -------------------------------------------
 class searchtitlekeyword(Frame):
@@ -364,7 +378,6 @@ class searchtitlekeyword(Frame):
         Frame.__init__(self,parent)
         self.controller = controller        #set the controller
         self.title = "Results"              #ttile of the window
-
 
 
 if __name__ == "__main__":
