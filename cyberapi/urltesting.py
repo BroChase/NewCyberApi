@@ -10,8 +10,10 @@ import webbrowser
 import unicodedata
 import re
 import datetime
+from time import strftime
 
-
+#todo add destroy for the filter options. so that they get destroyed upon new search and reset the checkbox to unchecked
+#todo deactivate the search button untill text has been entered into the search box.
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -76,7 +78,7 @@ class Welcome(Frame):
         self.but_urisearch.grid(column=1, row=4, columnspan=2)
         self.check_filter.grid(column=1, row=5, sticky='W')
         #todo row adustment
-        self.grid_rowconfigure(12, weight=20)
+        self.grid_rowconfigure(13, weight=20)
 
 
     def filter_op(self):
@@ -92,7 +94,13 @@ class Welcome(Frame):
             self.fD_label = Label(self, text='Date: ')
             self.fD_format = Label(self, text='00/00/0000')
             self.fD_format.configure(foreground='grey')
+            self.fD_beinlab = Label(self, text='Begin: ')
+            self.fD_endlab = Label(self, text='End: ')
             self.fD_ent = Entry(self, width=10, bd=2)
+            self.fD_ent.insert('end', '01/01/0001')
+            self.fD_ent2 = Entry(self, width=10, bd=2)
+            self.fD_ent2.insert('end', strftime('%m/%d/%Y'))
+            #print(strftime('%m-%d-%Y'))
             #window placements
             self.fauthor_label.grid(column=1, row=6, sticky='w')
             self.fauthor_entry.grid(column=2, row=6, sticky='W')
@@ -102,7 +110,10 @@ class Welcome(Frame):
             self.fsub_lt.grid(column=2, row=9, sticky='W')
             self.fD_label.grid(column=1, row=10, sticky='W')
             self.fD_format.grid(column=2, row=10, sticky='W')
+            self.fD_beinlab.grid(column=1, row=11, sticky='E')
             self.fD_ent.grid(column=2, row=11, sticky='W')
+            self.fD_endlab.grid(column=1, row=12, sticky='E')
+            self.fD_ent2.grid(column=2, row=12, sticky='W')
 
             #if the button gets unchecked it will destroy the labels and entry widgets.
         else:
@@ -115,6 +126,9 @@ class Welcome(Frame):
             self.fD_label.destroy()
             self.fD_format.destroy()
             self.fD_ent.destroy()
+            self.fD_beinlab.destroy()
+            self.fD_endlab.destroy()
+            self.fD_ent2.destroy()
     #todo radio button selection for the greater less than options of filter search
     def rbselection(self):
         print('hi')
@@ -150,6 +164,9 @@ class Welcome(Frame):
 
         self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
                                                                                   + self.ent_title.get()))
+        #http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='string'
+        #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
+
         #window placements
         self.titlelabel.grid(column=3, row=1)
         self.ent_title.grid(column=4, row=1)
@@ -183,8 +200,9 @@ class Welcome(Frame):
         self.titlelabel = Label(self, text='Title')
         self.bodylabel = Label(self, text='Body')
         self.ent_body = Entry(self, width=30, bd=2)
-
-        self.but_search = Button(self, text='Search')
+#todo search body and title
+        self.but_search = Button(self, text='Search',command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
+                                                                                  + self.ent_title.get()+'&body=' + self.ent_body.get()))
 
         #window placments
         self.titlelabel.grid(column=3, row=1)
@@ -220,6 +238,9 @@ class Welcome(Frame):
         self.urilabel = Label(self, text="URI")
         self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='
                                                                                    + self.ent_uri.get()))
+        #http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='string'
+        #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
+
         #window placements
         self.urilabel.grid(column=3, row=1)
         self.ent_uri.grid(column=4, row=1)
@@ -257,8 +278,10 @@ class Welcome(Frame):
         self.datelabelex.configure(foreground='grey')
         self.ent_date = Entry(self, width=10, bd=2)
         self.ent_edate = Entry(self, width=10, bd=2)
-        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=date&sdate='
-                                                                                  + self.ent_date.get()+'&edate='+self.ent_edate.get()))
+        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='
+                                                                                  + self.ent_date.get()+'&zdate='+self.ent_edate.get()))
+        #http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='00/00/0000'&zdate='00/00/0000
+        #+ &author='string'&+&sub=gt&sdate='00/00/0000&edate='00/00/0000'
 
         #window plecements
         self.but_search.grid(column=5, row=1)
@@ -269,21 +292,28 @@ class Welcome(Frame):
         self.ent_date.grid(column=4, row=2, sticky='W')
         self.ent_edate.grid(column=4, row=3, sticky='W')
 
-
-
-
     def search(self,url):
 
+        if hasattr(self, 'fauthor_entry'):
+            au = self.fauthor_entry.get()
+            au = au.replace(' ', '')
+            if self.var2.get() == 2:
+                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate=4/20/2017'
+                print(url)
+            elif self.var2.get() == 3:
+                url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate=4/20/2017'
+            else:
+                url = url + '&author=' + au + '&sub=&sdate=' + self.fD_ent.get()+'&edate=4/20/2017'
+        else:
+            url = url+'&author=&sub=&sdate=01/01/0001&edate='+strftime('%m/%d/%Y')
+            print(url)
         r = urllib.request.urlopen(url)
         data = json.load(r)
-        # self.var2.get() = 2
-        # self.var2.get() = 3
-        # self.fD_ent
         self.tree = Treeview(self)
         self.tree.heading('#0', text='Title')
         self.tree.column('#0', stretch=True)
         #todo edit rowspan to change size of the tree window with title return
-        self.tree.grid(column=6, row=1,rowspan=12, sticky='nsew')
+        self.tree.grid(column=6, row=1, rowspan=13, sticky='nsew')
 
         if data:
             for item in (data):
@@ -321,6 +351,7 @@ class Welcome(Frame):
 
 
 
+#todo ---------junk-------------------------
     def about(self):
         messagebox.showinfo("About", "Chase Brown")  # messagebox when File<About.? is selected
 
