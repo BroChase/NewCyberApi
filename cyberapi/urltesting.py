@@ -6,7 +6,7 @@ from pprint import pprint
 import urllib.request
 import json
 import webbrowser
-
+import unicodedata
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
@@ -49,44 +49,123 @@ class Welcome(Frame):
         Frame.__init__(self,parent)
         self.controller = controller        #set the controller
         self.title = "Article Search"              #ttile of the window
-        self.grid_rowconfigure(2, weight=1)
-        self.grid_columnconfigure(4, weight=1)
+        #self.grid_rowconfigure(2, weight=1)
+        self.grid_columnconfigure(5, weight=1)
         #Window Buttons
-        self.but_titlesearch = Button(self, text='Search Title', width=30, command=self.tkwsearch,
+        self.but_titlesearch = Button(self, text='Search Title', width=35, command=self.tkwsearch,
                                       relief=RAISED, bd=4)
-        self.but_titlebodysearch = Button(self, text='Search Title & Body', width=30, command=self.tbssearch,
+        self.but_titlebodysearch = Button(self, text='Search Title & Body', width=35, command=self.tbssearch,
                                          relief=RAISED, bd=4)
+        self.but_datesearch = Button(self, text='Search By Date', width=35, command=self.sbdsearch,
+                                     relief=RAISED, bd=4)
+        self.but_urisearch = Button(self, text='Search By URI', width=35, command=self.urisearch,
+                                    relief=RAISED, bd=4)
+        self.var = IntVar()
+        self.check_filter = Checkbutton(self, text="Advanced Filter", variable=self.var, command= self.filter_op)
+
 
         #Formatting of the window
-        self.but_titlesearch.grid(column=1, row =1)
-        self.but_titlebodysearch.grid(column=1, row=2)
-        self.grid_rowconfigure(3, weight=20)
+        self.but_titlesearch.grid(column=1, row =1,columnspan=2)
+        self.but_titlebodysearch.grid(column=1, row=2, columnspan=2)
+        self.but_datesearch.grid(column=1, row=3, columnspan=2)
+        self.but_urisearch.grid(column=1, row=4, columnspan=2)
+        self.check_filter.grid(column=1, row=5, sticky='W')
+        #todo row adustment
+        self.grid_rowconfigure(11, weight=20)
 
+
+    def filter_op(self):
+        if self.var.get():
+            self.fauthor_label = Label(self, text='Author: ')
+            self.fauthor_entry = Entry(self, width=22, bd=2)
+            self.fsub_label = Label(self, text='Subjectivity: ')
+            self.var2 = IntVar()
+            self.var2.set(1)
+            self.fsub_nv = Radiobutton(self, text ='Null', variable=self.var2, value=1, command=self.rbselection)
+            self.fsub_gt = Radiobutton(self, text='GreaterThan', variable=self.var2, value=2, command=self.rbselection)
+            self.fsub_lt = Radiobutton(self, text='LessThan', variable=self.var2, value=3, command=self.rbselection)
+            #window formatting
+
+            self.fauthor_label.grid(column=1, row=6, sticky='w')
+            self.fauthor_entry.grid(column=2, row=6, sticky='W')
+            self.fsub_label.grid(column=1, row=7, sticky='W')
+            self.fsub_nv.grid(column=2, row=7, sticky='W')
+            self.fsub_gt.grid(column=2, row=8, sticky='W')
+            self.fsub_lt.grid(column=2, row=9, sticky='W')
+
+#if the button gets unchecked it will destroy the labels and entry widgets.
+        else:
+            self.fauthor_label.destroy()
+            self.fauthor_entry.destroy()
+            self.fsub_label.destroy()
+            self.fsub_nv.destroy()
+            self.fsub_gt.destroy()
+            self.fsub_lt.destroy()
+
+        #formatting for the window
 #search by title
-    def tkwsearch(self):
-        self.ent_title = Entry(self, text='Title', width=30,bd=2)
-        self.but_search = Button(self, text='Search', command=lambda: self.search(self.ent_title.get()))
-
-        #window placement
-        self.ent_title.grid(column=2, row=1)
-        self.but_search.grid(column=3, row=1, sticky='N')
-#todo search by title&body
-    def tbssearch(self):
+    def rbselection(self):
         print('hi')
+
+
+    def tkwsearch(self):
+        self.ent_title = Entry(self, width=30, bd=2)
+        self.titlelabel = Label(self, text='Title')
+        if hasattr(self, 'bodylabel'):
+            self.bodylabel.destroy()
+            self.ent_body.destroy()
+
+        self.but_search = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
+                                                                                  + self.ent_title.get()))
+        #window placement
+        self.titlelabel.grid(column=2, row=1)
+        self.ent_title.grid(column=3, row=1)
+        self.but_search.grid(column=4, row=1)
+
+#search by title&body todo write url path for getting keyword from body and title
+    def tbssearch(self):
+        self.ent_title = Entry(self, width=30, bd=2)
+        self.titlelabel = Label(self, text='Title')
+        self.bodylabel = Label(self, text='Body')
+        self.ent_body = Entry(self, width=30, bd=2)
+
+        self.but_search = Button(self, text='Search')
+
+        #window placment
+        self.titlelabel.grid(column=2, row=1)
+        self.bodylabel.grid(column=2, row =2)
+        self.ent_title.grid(column=3, row=1)
+        self.ent_body.grid(column=3, row=2)
+        self.but_search.grid(column=4, row=1)
+
 #todo search by Date
-
+    def sbdsearch(self):
+        print('hi')
 #todo search by uri
+    def urisearch(self):
+        self.ent_uri = Entry(self, width=30, bd=2)
+        self.urilabel = Label(self, text="URI")
+        self.but_ksearch = Button(self, text='Search', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='
+                                                                                   + self.ent_uri.get()))
 
-    def search(self, title):
-        url = 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title=' + title
+        self.ent_uri.grid(column=3, row=1)
+        self.urilabel.grid(column=2, row=1)
+        self.but_ksearch.grid(column=4, row=1)
+
+
+    def search(self,url):
         r = urllib.request.urlopen(url)
         data = json.load(r)
         self.tree = Treeview(self)
         self.tree.heading('#0', text='Title')
         self.tree.column('#0', stretch=True)
-        self.tree.grid(column=4, row=1,rowspan=3, sticky='nsew')
+        self.tree.grid(column=5, row=1,rowspan=10, sticky='nsew')
+
         if data:
             for item in (data):
+                #remove BOM images first from body >uffff
+                item['body'] = ''.join(c for c in unicodedata.normalize('NFC', item['body']) if c <= '\uFFFF')
+                #populate the tree window
                 self.tree.insert('', 'end', text=item['title'], values=(item['uri'], item['body'], item['title'],
                                                                         item['author'], item['date']))
             self.tree.bind('<Double-1>', self.on_click)
@@ -136,4 +215,3 @@ class searchtitlekeyword(Frame):
 if __name__ == "__main__":
     app = cyberapi()
     app.mainloop()
-
