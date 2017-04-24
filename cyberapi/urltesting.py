@@ -12,9 +12,6 @@ import re
 import datetime
 from time import strftime
 
-#todo add destroy for the filter options. so that they get destroyed upon new search and reset the checkbox to unchecked
-
-
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
@@ -49,17 +46,16 @@ class cyberapi(Tk):
 
     def changeTitle(self, newTitle):
         self.title(newTitle)
-
-
-    # noinspection PyMandatoryEncoding,PyMissingOrEmptyDocstring
 class Welcome(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self,parent)
         self.controller = controller        #set the controller
         self.title = "Article Search"              #ttile of the window
-        #self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(15, weight=1)
         self.grid_columnconfigure(6, weight=1)
+        self.grid_columnconfigure(7, weight=5)
+        self.grid_columnconfigure(8, weight=1)
         #Window Buttons
         self.but_titlesearch = Button(self, text='Search Title', width=35, command=self.tkwsearch,
                                       relief=RAISED, bd=4)
@@ -80,7 +76,6 @@ class Welcome(Frame):
         self.check_filter.grid(column=1, row=5, sticky='W')
         #todo row adustment
         self.grid_rowconfigure(13, weight=20)
-
 
     def filter_op(self):
         if self.var.get():
@@ -306,10 +301,11 @@ class Welcome(Frame):
         self.ent_edate.grid(column=4, row=3, sticky='W')
 
     def search(self,url):
-
-        if hasattr(self, 'fauthor_entry'):
+        if self.var.get():
+            print(self.var.get())
+        #if hasattr(self, 'fauthor_entry'):
             au = self.fauthor_entry.get()
-            au = au.replace(' ', '')
+            au = au.replace(' ', '+')
             #var2 is the state of the radio check button
             if self.var2.get() == 2:
                 url = url+'&author='+au+'&sub=gt&sdate='+self.fD_ent.get()+'&edate='+self.fD_ent2.get()
@@ -324,10 +320,10 @@ class Welcome(Frame):
         r = urllib.request.urlopen(url)
         data = json.load(r)
         self.tree = Treeview(self)
-        self.tree.heading('#0', text='Title')
+        self.tree.heading('#0', text='Results by Title')
         self.tree.column('#0', stretch=True)
         #todo edit rowspan to change size of the tree window with title return
-        self.tree.grid(column=6, row=1, rowspan=13, sticky='nsew')
+        self.tree.grid(column=7, row=2, rowspan=12, sticky='nsew')
 
         if data:
             for item in (data):
@@ -338,6 +334,7 @@ class Welcome(Frame):
 
             self.tree.bind('<Double-1>', self.on_click)
 #on_click "double clicking on the article from the tree window opens up the article to be viewed"
+
     def on_click(self, event):
         item = self.tree.selection()[0]
         self.n = self.tree.item(item,'values')
@@ -359,18 +356,13 @@ class Welcome(Frame):
         articledate.grid(column=3, row=4, sticky='W')
         topics.grid(column=4, row=4)
 
-
-
     #op_link "double click on the link at the top of the page opens up the url link
     def op_link(self, event):
         webbrowser.open_new(self.n[0])
+
     #event bind when Return is entered after a title keyword is entered will enable the search button.
     def enableSearch(self, event):
         self.but_search.configure(state='normal')
-
-
-
-
 
 #todo -------------------------------------------
 class searchtitlekeyword(Frame):
