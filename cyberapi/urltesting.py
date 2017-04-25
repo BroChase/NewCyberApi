@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter.ttk import Frame
 from tkinter.ttk import Treeview
-from tkinter.ttk import Combobox
+from tkinter.ttk import Combobox, Progressbar, Style
 from tkinter import messagebox
 from pprint import pprint
 import urllib.request
@@ -12,7 +12,7 @@ import re
 import datetime
 from time import strftime
 import makemenu
-
+from PIL import ImageTk, Image
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
@@ -26,12 +26,12 @@ class cyberapi(Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.resizable(width=False, height=False)
+        #self.resizable(width=False, height=False)
 
         #get screen dimensions and center window
         xoffset = int(self.winfo_screenwidth()/2-1280/2)
         yoffset = int(self.winfo_screenheight()/2-800/2)
-        self.geometry("%dx%d+%d+%d" % (1280, 800, xoffset, yoffset))    #set geometry of window
-
+        self.geometry("%dx%d+%d+%d" % (500, 300, xoffset, yoffset))    #set geometry of window
         self.frames = {}
         for F in (Welcome, searchtitlekeyword):       #The two windows used in program sets the page
             page_name = F.__name__
@@ -39,7 +39,8 @@ class cyberapi(Tk):
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame("Welcome")          #call show_frame to display the welcome window
+        #self.show_frame("Welcome")          #call show_frame to display the welcome window
+        self.show_frame('searchtitlekeyword')
 
     def show_frame(self, page_name):
         frame = self.frames[page_name]
@@ -58,6 +59,7 @@ class Welcome(Frame):
         self.grid_columnconfigure(6, weight=1)
         self.grid_columnconfigure(7, weight=5)
         self.grid_columnconfigure(8, weight=1)
+
         #Window Buttons
         self.but_titlesearch = Button(self, text='Search Title', width=35, command=self.tkwsearch,
                                       relief=RAISED, bd=4)
@@ -368,12 +370,86 @@ class Welcome(Frame):
     def enableSearch(self, event):
         self.but_search.configure(state='normal')
 
+
+
 #todo -------------------------------------------
 class searchtitlekeyword(Frame):
     def __init__(self, parent, controller):
-        Frame.__init__(self,parent)
-        self.controller = controller        #set the controller
-        self.title = "Results"              #ttile of the window
+        Frame.__init__(self, parent)
+        container = Frame(self)
+        self.controller = controller  # set the controller
+        #self.controller = controller        #set the controller
+        self.title = "CreepyCrawler"              #ttile of the window
+        self.grid_columnconfigure(0, weight=3)
+        self.grid_columnconfigure(1, weight=5)
+        self.grid_columnconfigure(2, weight=3)
+        self.grid_rowconfigure(1, weight=4)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
+        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure(7, weight=1)
+        self.grid_rowconfigure(8, weight=1)
+        self.grid_rowconfigure(9, weight=1)
+        self.grid_rowconfigure(10, weight=1)
+
+
+        path = 'spiderweb2.jpg'
+        self.img = ImageTk.PhotoImage(Image.open(path))
+        self.panel = Label(self, image=self.img)
+        self.panel.grid(column=1, row=1,columnspan=20,rowspan=20)
+
+        s = Style()
+        s.configure("blue.Horizontal.TProgressbar", troughcolor='black', background='#00FFF1')
+        self.progress = Progressbar(self, orient="horizontal", style='blue.Horizontal.TProgressbar', length=500, mode="determinate")
+        #self.controller.attributes('-transparentcolor', 'black')
+        self.style = Style()
+        self.style.configure('My.TFrame', background='#434343')
+        self.sf = Frame(self, width=186, height=120, style='My.TFrame')
+        self.sf['relief']='sunken'
+
+        self.wl= Label(self, text='WELCOME', width=18)
+        self.wl.configure(background='#434343', foreground='#06c8e6', font='bold')
+        self.ns = Label(self, text='New Session', width=25)
+        self.ns.configure(height=2, background='#828282', foreground='#06c8e6')
+        self.rs = Label(self, text='Restore Session', width=25)
+        self.rs.configure(background='#434343', foreground='#06c8e6')
+        #window placements
+        self.progress.grid(column=1, row=1, sticky='N')
+        self.sf.grid(column=1, row=2, rowspan=4)
+        self.wl.grid(column=1, row=2, sticky='S')
+        self.ns.grid(column=1, row=3)
+        self.rs.grid(column=1, row=4, sticky='N')
+
+        self.bytes = 0
+        self.maxbytes = 0
+
+
+    def start(self):
+        self.progress["value"] = 0
+        self.maxbytes = 50000
+        self.progress["maximum"] = 50000
+        self.read_bytes()
+
+    def read_bytes(self):
+        '''simulate reading 500 bytes; update progress bar'''
+        self.bytes += 10000
+        self.progress["value"] = self.bytes
+        if self.bytes < self.maxbytes:
+            # read more bytes after 100 ms
+            self.after(100, self.read_bytes)
+        else:
+            self.welcomewindowing()
+
+
+    def welcomewindowing(self):
+        xoffset = int(self.winfo_screenwidth() / 2 - 1280 / 2)
+        yoffset = int(self.winfo_screenheight() / 2 - 800 / 2)
+        self.controller.geometry("%dx%d+%d+%d" % (1280, 800, xoffset, yoffset))  # set geometry of window
+        self.controller.show_frame('Welcome')
+
+
 
 if __name__ == "__main__":
     app = cyberapi()
