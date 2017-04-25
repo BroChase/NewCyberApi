@@ -11,14 +11,16 @@ import unicodedata
 import re
 import datetime
 from time import strftime
+import makemenu
 
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
-        self.title("Python Port Scanner")       #Title of window
+        self.title("Article Searcher")       #Title of window
         #set the frame dimentions and pack the parent window
         container = Frame(self)
+        menu = makemenu.MenuMaker2000(self).createMenu()
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
