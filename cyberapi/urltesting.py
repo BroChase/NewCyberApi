@@ -202,7 +202,7 @@ class Welcome(Frame):
         self.bodylabel = Label(self, text='Body')
         self.ent_body = Entry(self, width=30, bd=2)
         self.ent_body.bind('<Return>', self.enableSearch)
-        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
+        self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordbody&title='
                                                                                   + self.ent_title.get()+'&body=' + self.ent_body.get()))
         #window placments
         self.titlelabel.grid(column=3, row=1)
@@ -285,6 +285,8 @@ class Welcome(Frame):
         self.datelabelex.configure(foreground='grey')
         self.ent_date = Entry(self, width=10, bd=2)
         self.ent_edate = Entry(self, width=10, bd=2)
+        self.ent_date.insert('end', '01/01/2016')
+        self.ent_edate.insert('end', strftime('%m/%d/%Y'))
         self.ent_edate.bind('<Return>', self.enableSearch)
         self.but_search = Button(self, text='Search', width=20, state='disable', command=lambda: self.search('http://cbrown686-test.apigee.net/cyberapi/articles?q=date&adate='
                                                                                   + self.ent_date.get()+'&zdate='+self.ent_edate.get()))
@@ -370,7 +372,6 @@ class searchtitlekeyword(Frame):
         Frame.__init__(self,parent)
         self.controller = controller        #set the controller
         self.title = "Results"              #ttile of the window
-
 
 if __name__ == "__main__":
     app = cyberapi()
