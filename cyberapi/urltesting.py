@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter.ttk import Frame
 from tkinter.ttk import Treeview
 from tkinter.ttk import Combobox, Progressbar, Style
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from pprint import pprint
 import urllib.request
 import json
@@ -13,6 +13,7 @@ import datetime
 from time import strftime
 import makemenu
 from PIL import ImageTk, Image
+import os
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
@@ -31,7 +32,7 @@ class cyberapi(Tk):
         #get screen dimensions and center window
         xoffset = int(self.winfo_screenwidth()/2-1280/2)
         yoffset = int(self.winfo_screenheight()/2-800/2)
-        self.geometry("%dx%d+%d+%d" % (500, 300, xoffset, yoffset))    #set geometry of window
+        self.geometry("%dx%d+%d+%d" % (700, 450, xoffset, yoffset))    #set geometry of window
         self.frames = {}
         for F in (Welcome, searchtitlekeyword):       #The two windows used in program sets the page
             page_name = F.__name__
@@ -378,55 +379,61 @@ class searchtitlekeyword(Frame):
         Frame.__init__(self, parent)
         container = Frame(self)
         self.controller = controller  # set the controller
-        #self.controller = controller        #set the controller
         self.title = "CreepyCrawler"              #ttile of the window
-        self.grid_columnconfigure(0, weight=3)
-        self.grid_columnconfigure(1, weight=5)
-        self.grid_columnconfigure(2, weight=3)
-        self.grid_rowconfigure(1, weight=4)
-        self.grid_rowconfigure(2, weight=1)
-        self.grid_rowconfigure(3, weight=1)
-        self.grid_rowconfigure(4, weight=1)
-        self.grid_rowconfigure(5, weight=1)
-        self.grid_rowconfigure(6, weight=1)
-        self.grid_rowconfigure(7, weight=1)
-        self.grid_rowconfigure(8, weight=1)
-        self.grid_rowconfigure(9, weight=1)
-        self.grid_rowconfigure(10, weight=1)
+
 
 
         path = 'spiderweb2.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
-        self.panel.grid(column=1, row=1,columnspan=20,rowspan=20)
+        self.panel.grid(column=1, row=1, columnspan = 10, rowspan=10)
 
-        s = Style()
-        s.configure("blue.Horizontal.TProgressbar", troughcolor='black', background='#00FFF1')
-        self.progress = Progressbar(self, orient="horizontal", style='blue.Horizontal.TProgressbar', length=500, mode="determinate")
-        #self.controller.attributes('-transparentcolor', 'black')
+        #Progress Bar
+        self.s = Style()
+        self.s.theme_use('clam')
+        self.s.configure("mongo.Horizontal.TProgressbar", foreground='#38494C', background='#5AE9FF')
+        self.progress = Progressbar(self, orient="horizontal", style='mongo.Horizontal.TProgressbar', length=700, mode="determinate")
+        self.controller.attributes('-transparentcolor', '#38494C')
+
+        #Menu Frame window
         self.style = Style()
         self.style.configure('My.TFrame', background='#434343')
-        self.sf = Frame(self, width=186, height=120, style='My.TFrame')
+        self.sf = Frame(self, width=186, height=160, style='My.TFrame')
         self.sf['relief']='sunken'
 
-        self.wl= Label(self, text='WELCOME', width=18)
-        self.wl.configure(background='#434343', foreground='#06c8e6', font='bold')
-        self.ns = Label(self, text='New Session', width=25)
+        self.menutree = Treeview(self)
+        self.menutree.column('#0', stretch=True)
+
+
+        #Menu Labels
+        self.wl= Label(self, text='WELCOME', width=24, height=2)
+        self.wl.configure(background='#434343', foreground='#06c8e6')
+        self.ns = Label(self, text='New Session', width=24, height=1)
         self.ns.configure(height=2, background='#828282', foreground='#06c8e6')
-        self.rs = Label(self, text='Restore Session', width=25)
+        self.ns.bind('<1>', self.start)
+        self.rs = Label(self, text='Restore Session', width=28,height=2)
         self.rs.configure(background='#434343', foreground='#06c8e6')
+
+
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(3, weight=3)
+
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(6, weight=1)
         #window placements
-        self.progress.grid(column=1, row=1, sticky='N')
-        self.sf.grid(column=1, row=2, rowspan=4)
-        self.wl.grid(column=1, row=2, sticky='S')
-        self.ns.grid(column=1, row=3)
-        self.rs.grid(column=1, row=4, sticky='N')
+
+        self.progress.grid(column=1, row=9, columnspan=3)
+        self.wl.grid(column=2, row=3, sticky='N')
+        self.ns.grid(column=2, row=4)
+        self.rs.grid(column=1, row=1,sticky='NW')
+        self.menutree.grid(column=1, row=1,rowspan=8, sticky='NWS')
+
 
         self.bytes = 0
         self.maxbytes = 0
 
-
-    def start(self):
+    #little display load bar
+    def start(self, event):
         self.progress["value"] = 0
         self.maxbytes = 50000
         self.progress["maximum"] = 50000
@@ -434,11 +441,11 @@ class searchtitlekeyword(Frame):
 
     def read_bytes(self):
         '''simulate reading 500 bytes; update progress bar'''
-        self.bytes += 10000
+        self.bytes += 1000
         self.progress["value"] = self.bytes
         if self.bytes < self.maxbytes:
             # read more bytes after 100 ms
-            self.after(100, self.read_bytes)
+            self.after(25, self.read_bytes)
         else:
             self.welcomewindowing()
 
