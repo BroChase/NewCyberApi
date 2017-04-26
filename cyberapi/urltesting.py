@@ -106,7 +106,6 @@ class SearchFrame(Frame):
         self.check_filter.place(x=400, y=350)
     #todo if the user selects to load a search it will simply jump to results
 
-
     def searchButton(self,event):
         if self.box.current() is 0:
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
@@ -303,7 +302,6 @@ class SearchFrame(Frame):
             self.fD_endlab.place(x=(-100), y=(-100))
             self.fD_ent2.place(x=(-100), y=(-100))
 
-
     #search for that almighty data mine.
     def search(self, url):
         print(url)
@@ -459,15 +457,12 @@ class SearchFrame(Frame):
         else:
             self.but_search.configure(state='disabled')
 
-#todo -------------------------------------------
 class StartFrame(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         container = Frame(self)
         self.controller = controller  # set the controller
         self.title = "CreepyCrawler"              #ttile of the window
-
-
 
         path = 'spiderweb2.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
@@ -488,9 +483,9 @@ class StartFrame(Frame):
         self.sf = Frame(self, width=179, height=76, style='My.TFrame')
         self.sf['relief']='sunken'
 
+        #todo to be populated with old searches to be able to reopen.
         self.menutree = Treeview(self)
         self.menutree.column('#0', stretch=True)
-
 
         #Menu Labels
         self.wl= Label(self, text='WELCOME', width=24, height=2)
@@ -500,13 +495,6 @@ class StartFrame(Frame):
         self.ns.bind('<1>', self.start)
         self.rs = Label(self, text='Restore Session', width=28,height=2)
         self.rs.configure(background='#434343', foreground='#06c8e6')
-
-
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure(3, weight=3)
-
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(6, weight=1)
         #window placements
         self.sf.pack()
         self.sf.place(x=298, y=162)
@@ -524,7 +512,7 @@ class StartFrame(Frame):
         self.bytes = 0
         self.maxbytes = 0
 
-    #little display load bar
+    #little display load bar for visual effect :P
     def start(self, event):
         self.progress["value"] = 0
         self.maxbytes = 50000
@@ -540,7 +528,6 @@ class StartFrame(Frame):
             self.after(25, self.read_bytes)
         else:
             self.welcomewindowing()
-
 
     def welcomewindowing(self):
         xoffset = int(self.winfo_screenwidth() / 2 - 1280 / 2)
