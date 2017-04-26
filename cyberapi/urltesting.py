@@ -30,7 +30,6 @@ class cyberapi(Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.resizable(width=False, height=False)
-        #self.resizable(width=False, height=False)
 
         #get screen dimensions and center window
         xoffset = int(self.winfo_screenwidth()/2-1280/2)
@@ -70,7 +69,6 @@ class SearchFrame(Frame):
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
         self.panel.pack()
-        self.panel.place()
         self.searchwindow()
 
     #search window populates the window with widgets for searching
@@ -91,18 +89,15 @@ class SearchFrame(Frame):
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitlebody&title='
                 + self.ent_keyword.get() + '&body=' + self.ent_keyword.get()))
-            self.but_search.pack()
             self.but_search.place(x=515, y=350)
         else:
             self.searchButton()
 
         #window placements
         #ENTRY BOX for keyword
-        self.ent_keyword.pack()
         self.ent_keyword.place(x=300, y=310)
 
         #check button
-        self.check_filter.pack()
         self.check_filter.place(x=400, y=350)
     #todo if the user selects to load a search it will simply jump to results
 
@@ -111,28 +106,24 @@ class SearchFrame(Frame):
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitlebody&title='
                 + self.ent_keyword.get() + '&body=' + self.ent_keyword.get()))
-            self.but_search.pack()
             self.but_search.place(x=515, y=350)
             self.enableSearch2()
         elif self.box.current() is 1:
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title='
                 + self.ent_keyword.get()))
-            self.but_search.pack()
             self.but_search.place(x=515, y=350)
             self.enableSearch2()
         elif self.box.current() is 2:
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=bodyonly&body='
                 + self.ent_keyword.get()))
-            self.but_search.pack()
             self.but_search.place(x=515, y=350)
             self.enableSearch2()
         elif self.box.current() is 3:
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='
                 + self.ent_keyword.get()))
-            self.but_search.pack()
             self.but_search.place(x=515, y=350)
             self.enableSearch2()
     #Hitting escape when editing the ENTRY box will clear it and disable the search button from being able to be used.
@@ -173,39 +164,25 @@ class SearchFrame(Frame):
 
         # window placements
             #appearing labael
-            self.appearing_label.pack()
             self.appearing_label.place(x=400, y=380)
             #appearing pick
-            self.box.pack()
             self.box.place(x=510, y=380)
             #author label
-            self.author_label.pack()
             self.author_label.place(x=400, y=405)
             #author entry
-            self.author_entry.pack()
             self.author_entry.place(x=510, y=405)
             #subjectivity
-            self.fsub_label.pack()
             self.fsub_label.place(x=400, y=430)
-            self.fsub_nv.pack()
             self.fsub_nv.place(x=510, y=430)
-            self.fsub_gt.pack()
             self.fsub_gt.place(x=510, y=455)
-            self.fsub_lt.pack()
             self.fsub_lt.place(x=510, y=480)
 
             #date
-            self.fD_label.pack()
             self.fD_label.place(x=400, y=505)
-            self.fD_format.pack()
             self.fD_format.place(x=440, y=507)
-            self.fD_beinlab.pack()
             self.fD_beinlab.place(x=510, y=505)
-            self.fD_ent.pack()
             self.fD_ent.place(x=555, y=505)
-            self.fD_endlab.pack()
             self.fD_endlab.place(x=590, y=505)
-            self.fD_ent2.pack()
             self.fD_ent2.place(x=625, y=505)
 
             # if the button gets unchecked it will destroy the labels and entry widgets.
@@ -327,7 +304,6 @@ class SearchFrame(Frame):
         self.tree = Treeview(self)
         self.tree.heading('#0', text='Results by Title')
         self.tree.column('#0', stretch=True)
-        self.tree.pack()
         self.tree.place(x=682, relheight=1, relwidth=.38)
 
         if data:
@@ -345,17 +321,14 @@ class SearchFrame(Frame):
             #sunken box that topics print out into
             self.style = Style()
             self.style.configure('My.TFrame', background='#383838')
-            self.sf = Frame(self, width=500, height=150, style='My.TFrame')
+            self.sf = Frame(self, width=550, height=150, style='My.TFrame')
             self.sf['relief'] = 'sunken'
-            self.sf.pack()
-            self.sf.place(x=90, y=80)
+            self.sf.place(x=70, y=80)
 
             # labels for article topics
             self.topicsHead = Label(self, font="times 16 underline",background='#282828', foreground='#5DE0DC')
             self.topics = Label(self, wraplength=500, font='times 14',background='#383838', foreground='#5DE0DC')
-            self.topics.pack()
             self.topics.place(x=100, y=95)
-            self.topicsHead.pack()
             self.topicsHead.place(x=250, y=50)
 
             #New Search Edit Search Save Search
@@ -365,16 +338,21 @@ class SearchFrame(Frame):
                                       command=self.EditSearch)
             self.save_search = Button(self, text='Save Search', background='#383838', foreground='#5DE0DC')
 
-            self.new_search.pack(side=BOTTOM, anchor='s')
             self.new_search.place(x=1, y=675)
-            self.edit_search.pack(side=BOTTOM, anchor='s')
             self.edit_search.place(x=75, y=675)
-            self.save_search.pack(side=BOTTOM, anchor='s')
             self.save_search.place(x=145, y=675)
 
         else:
-            self.topicsHead.config(text='')
+            self.edit_search = Button(self, text='Edit Search', background='#383838', foreground='#5DE0DC',
+                                      command=self.EditSearch)
+            self.edit_search.place(x=1, y=675)
+            self.topicsHead = Label(self, font="times 16 underline",background='#282828', foreground='#5DE0DC')
+            self.topics = Label(self, wraplength=500, font='times 14',background='#383838', foreground='#5DE0DC')
+            self.topics.place(x=100, y=95)
+            self.topicsHead.place(x=250, y=50)
+            self.topicsHead.config(text='No Articles Matching Search')
             self.topics.config(text='')
+
 
 
             # on_click "double clicking on the article from the tree window opens up the article to be viewed"
@@ -424,15 +402,10 @@ class SearchFrame(Frame):
         articledate = Label(tw, text='Date Published: ' + self.n[4])
 
         # window formatting for tw
-        link.pack()
         link.place(x=0, y=0, relwidth=1)
-        tb.pack()
         tb.place(y=20, relwidth=1, relheight=1)
         auth.pack(side=LEFT, anchor='sw')
-        auth.place()
         articledate.pack(side=RIGHT, anchor='se')
-        articledate.place()
-
     # op_link "double click on the link at the top of the page opens up the url link
     def op_link(self, event):
         webbrowser.open_new(self.n[0])
@@ -468,7 +441,6 @@ class StartFrame(Frame):
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
         self.panel.pack()
-        self.panel.place()
 
         #Progress Bar
         self.s = Style()
@@ -496,17 +468,11 @@ class StartFrame(Frame):
         self.rs = Label(self, text='Restore Session', width=28,height=2)
         self.rs.configure(background='#434343', foreground='#06c8e6')
         #window placements
-        self.sf.pack()
         self.sf.place(x=298, y=162)
-        self.wl.pack()
         self.wl.place(x=300,y=165)
-        self.ns.pack()
         self.ns.place(x=300, y= 200)
-        self.rs.pack()
         self.rs.place(x=0, relwidth=.25)
-        self.menutree.pack()
         self.menutree.place(x=0, relwidth=.25, relheight=.98)
-        self.progress.pack()
         self.progress.place(y=440)
 
         self.bytes = 0
