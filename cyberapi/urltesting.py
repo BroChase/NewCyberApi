@@ -297,8 +297,8 @@ class SearchFrame(Frame):
             url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
 
         print(url)
-        data = requests.get(url).json()
-        print(data)
+        self.data = requests.get(url).json()
+        #print(data)
 
         self.hideshit()
         self.tree = Treeview(self)
@@ -306,8 +306,8 @@ class SearchFrame(Frame):
         self.tree.column('#0', stretch=True)
         self.tree.place(x=682, relheight=1, relwidth=.38)
 
-        if data:
-            for item in data:
+        if self.data:
+            for item in self.data:
                 # remove BOM images first from body >uffff
                 item['body'] = ''.join(c for c in unicodedata.normalize('NFC', item['body']) if c <= '\uFFFF')
                 self.tree.insert('', 'end', text=item['title'], values=(item['uri'], item['body'], item['title'],
@@ -336,7 +336,8 @@ class SearchFrame(Frame):
                                      command= self.NewSearch)
             self.edit_search = Button(self, text='Edit Search', background='#383838', foreground='#5DE0DC',
                                       command=self.EditSearch)
-            self.save_search = Button(self, text='Save Search', background='#383838', foreground='#5DE0DC')
+            self.save_search = Button(self, text='Save Search', background='#383838', foreground='#5DE0DC',
+                                      command=self.saveMenu)
 
             self.new_search.place(x=1, y=675)
             self.edit_search.place(x=75, y=675)
@@ -355,6 +356,7 @@ class SearchFrame(Frame):
 
 
 
+
             # on_click "double clicking on the article from the tree window opens up the article to be viewed"
     def NewSearch(self):
         self.deletesearch()
@@ -363,9 +365,22 @@ class SearchFrame(Frame):
         self.deletesearch()
         self.undohide()
 
-    #todo implement the save function
-    def SaveSearch(self):
-        print('hi')
+    def saveMenu(self):
+        # create main directory and subdir(current date) if not made already
+        path = os.getcwd() + "/Sessions/" + str(datetime.date.today())
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # get a filename from the user or default to current time
+        currentTime = datetime.datetime.now().strftime("%H_%M_%S")
+
+        filename = filedialog.asksaveasfilename(defaultextension="txt", initialdir=path, initialfile=currentTime)
+        if filename:
+            self.saveFilename = filename
+            with open(filename, 'w') as outfile:
+                json.dump(self.data, outfile)
+            # with open(filename, 'w') as f:
+            #     f.write("Testing Save As/No Current Save")
+
 
     #defind clear search
     def deletesearch(self):
@@ -460,23 +475,62 @@ class StartFrame(Frame):
         self.menutree.column('#0', stretch=True)
 
         #Menu Labels
-        self.wl= Label(self, text='WELCOME', width=24, height=2)
+        self.wl= Label(self, text='WELCOME', width=15, height=2, font='bold')
         self.wl.configure(background='#434343', foreground='#06c8e6')
-        self.ns = Label(self, text='New Session', width=24, height=1)
+        self.ns = Label(self, text='-New Session-', width=24, height=1)
         self.ns.configure(height=2, background='#828282', foreground='#06c8e6')
         self.ns.bind('<1>', self.start)
-        self.rs = Label(self, text='Restore Session', width=28,height=2)
+        self.rs = Label(self, text='Restore Search', width=28,height=2)
         self.rs.configure(background='#434343', foreground='#06c8e6')
         #window placements
         self.sf.place(x=298, y=162)
-        self.wl.place(x=300,y=165)
+        self.wl.place(x=315,y=165)
         self.ns.place(x=300, y= 200)
         self.rs.place(x=0, relwidth=.25)
-        self.menutree.place(x=0, relwidth=.25, relheight=.98)
+        self.menutree.place(x=0,y=10, relwidth=.25, relheight=.96)
         self.progress.place(y=440)
 
         self.bytes = 0
         self.maxbytes = 0
+        self.openMenu()
+    def openMenu(self):
+        # set initial directory to savedScans folder
+        path = os.path.join(os.getcwd(), "Sessions")
+        filenames = os.listdir(path)
+
+        for file in filenames:
+            filetoprint = file.replace('2017-', '')
+            self.menutree.insert('', 'end', text=filetoprint, tags='date')
+            self.menutree.tag_configure('date', background='grey', foreground='yellow', font='bold, 10')
+            path= os.path.join(os.getcwd(), 'Sessions'+'\\'+file)
+            psr = os.listdir(path)
+            for f in psr:
+                filetoprint = f.replace('.txt', '')
+                self.menutree.insert('', 'end', text='  -'+filetoprint, values=f, tags='article')
+                self.menutree.tag_configure('article', background='#434343', foreground='#06c8e6')
+                #print(file)
+        self.menutree.bind('<1>', self.onmenuclick)
+
+        #fill tree with greay past files
+        for i in range(1,20):
+            self.menutree.insert('', 'end', text='', tags='clean')
+            self.menutree.tag_configure('clean', background='#434343')
+
+    def onmenuclick(self, event):
+        item = self.menutree.selection()
+        self.n = self.menutree.item(item)
+        print(self.n)
+
+        # path = os.path.join(os.getcwd(), 'Sessions'+'\\'+file)
+        # filenames = os.listdir(path)
+        # print(filenames)
+
+        # path = os.path.join(os.getcwd(), "Sessions")
+        # if not os.path.exists(path):
+        #     os.makedirs(path)
+        # filename = filedialog.askopenfilename(initialdir=path)
+        # if os.path.exists(path + filename):
+        #     self.saveFilename = filename
 
     #little display load bar for visual effect :P
     def start(self, event):

@@ -6,6 +6,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
 import requests
+import json
 from docx import Document
 from docx.shared import Inches
 
