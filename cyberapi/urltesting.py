@@ -71,7 +71,10 @@ class SearchFrame(Frame):
         self.panel = Label(self, image=self.img)
         self.panel.pack()
         self.panel.place()
+        self.searchwindow()
 
+    #search window populates the window with widgets for searching
+    def searchwindow(self):
         #keyword entry
         self.largefont = ('Veranda', 15)
         self.ent_keyword = Entry(self, width=40, relief='raised', font=self.largefont, bd=1)
@@ -93,18 +96,16 @@ class SearchFrame(Frame):
         else:
             self.searchButton()
 
-
         #window placements
         #ENTRY BOX for keyword
         self.ent_keyword.pack()
         self.ent_keyword.place(x=300, y=310)
-        #Search button
-        #todo might need to not pack the button or unpck and repack based on if it changes not sure yet..
-        # self.but_search.pack()
-        # self.but_search.place(x=515, y=350)
+
         #check button
         self.check_filter.pack()
         self.check_filter.place(x=400, y=350)
+    #todo if the user selects to load a search it will simply jump to results
+
 
     def searchButton(self,event):
         if self.box.current() is 0:
@@ -122,7 +123,6 @@ class SearchFrame(Frame):
             self.but_search.place(x=515, y=350)
             self.enableSearch2()
         elif self.box.current() is 2:
-            #todo write endpoint for just body search no title no url
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=bodyonly&body='
                 + self.ent_keyword.get()))
@@ -250,7 +250,8 @@ class SearchFrame(Frame):
             self.fD_beinlab.destroy()
             self.fD_endlab.destroy()
             self.fD_ent2.destroy()
-    def undohite(self):
+    #undoes the hide of the seach buttons so that they can edit the search
+    def undohide(self):
         self.ent_keyword.place(x=300, y=310)
         self.check_filter.place(x=400, y=350)
         self.but_search.place(x=515, y=350)
@@ -277,6 +278,8 @@ class SearchFrame(Frame):
             self.fD_ent.place(x=555, y=505)
             self.fD_endlab.place(x=590, y=505)
             self.fD_ent2.place(x=625, y=505)
+
+    #hides the widgets to display the search results
     def hideshit(self):
         self.ent_keyword.place(x=(-100), y=(-100))
         self.check_filter.place(x=(-100), y=(-100))
@@ -299,10 +302,11 @@ class SearchFrame(Frame):
             self.fD_beinlab.place(x=(-100), y=(-100))
             self.fD_endlab.place(x=(-100), y=(-100))
             self.fD_ent2.place(x=(-100), y=(-100))
+
+
     #search for that almighty data mine.
     def search(self, url):
         print(url)
-        #todo enter loading bar .start here
         if self.var.get():
             au = self.author_entry.get()
             au = au.replace(' ', '+')
@@ -316,17 +320,15 @@ class SearchFrame(Frame):
                 url = url + '&author=' + au + '&sub=&sdate=' + self.fD_ent.get() + '&edate=' + self.fD_ent2.get()
         else:
             url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
-            # print(url)
-        #todo enter loading bar .stop here
+
         print(url)
         data = requests.get(url).json()
         print(data)
+
         self.hideshit()
         self.tree = Treeview(self)
         self.tree.heading('#0', text='Results by Title')
         self.tree.column('#0', stretch=True)
-
-        # # todo edit rowspan to change size of the tree window with title return
         self.tree.pack()
         self.tree.place(x=682, relheight=1, relwidth=.38)
 
@@ -342,13 +344,14 @@ class SearchFrame(Frame):
             self.tree.bind('<Double-1>', self.on_click)
             self.tree.bind('<<TreeviewSelect>>', self.on_single_click)
 
-
+            #sunken box that topics print out into
             self.style = Style()
             self.style.configure('My.TFrame', background='#383838')
             self.sf = Frame(self, width=500, height=150, style='My.TFrame')
             self.sf['relief'] = 'sunken'
             self.sf.pack()
             self.sf.place(x=90, y=80)
+
             # labels for article topics
             self.topicsHead = Label(self, font="times 16 underline",background='#282828', foreground='#5DE0DC')
             self.topics = Label(self, wraplength=500, font='times 14',background='#383838', foreground='#5DE0DC')
@@ -357,19 +360,55 @@ class SearchFrame(Frame):
             self.topicsHead.pack()
             self.topicsHead.place(x=250, y=50)
 
+            #New Search Edit Search Save Search
+            self.new_search = Button(self, text='New Search', background='#383838', foreground='#5DE0DC',
+                                     command= self.NewSearch)
+            self.edit_search = Button(self, text='Edit Search', background='#383838', foreground='#5DE0DC',
+                                      command=self.EditSearch)
+            self.save_search = Button(self, text='Save Search', background='#383838', foreground='#5DE0DC')
+
+            self.new_search.pack(side=BOTTOM, anchor='s')
+            self.new_search.place(x=1, y=675)
+            self.edit_search.pack(side=BOTTOM, anchor='s')
+            self.edit_search.place(x=75, y=675)
+            self.save_search.pack(side=BOTTOM, anchor='s')
+            self.save_search.place(x=145, y=675)
+
         else:
             self.topicsHead.config(text='')
             self.topics.config(text='')
 
 
             # on_click "double clicking on the article from the tree window opens up the article to be viewed"
+    def NewSearch(self):
+        self.deletesearch()
+        self.searchwindow()
+    def EditSearch(self):
+        self.deletesearch()
+        self.undohide()
 
+    #todo implement the save function
+    def SaveSearch(self):
+        print('hi')
+
+    #defind clear search
+    def deletesearch(self):
+        self.tree.destroy()
+        self.sf.destroy()
+        self.topicsHead.destroy()
+        self.topics.destroy()
+        self.new_search.destroy()
+        self.edit_search.destroy()
+        self.save_search.destroy()
+
+    #on click gets the articles information and displays it in the Key Article Subjects window
     def on_single_click(self, event):
         self.topicsHead.config(text="Key Article Subjects")
         item = self.tree.item(self.tree.selection()[0], 'values')
         topicStr = ', '.join(self.analyzer.getMostCommonNounPhrases(5, [item[1]])) + '\n'
         self.topics.config(text=topicStr)
 
+    #on d click will open the article for display
     def on_click(self, event):
         item = self.tree.selection()[0]
         self.n = self.tree.item(item, 'values')
@@ -433,7 +472,8 @@ class StartFrame(Frame):
         path = 'spiderweb2.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
-        self.panel.grid(column=1, row=1, columnspan = 10, rowspan=10)
+        self.panel.pack()
+        self.panel.place()
 
         #Progress Bar
         self.s = Style()
@@ -445,7 +485,7 @@ class StartFrame(Frame):
         #Menu Frame window
         self.style = Style()
         self.style.configure('My.TFrame', background='#434343')
-        self.sf = Frame(self, width=186, height=160, style='My.TFrame')
+        self.sf = Frame(self, width=179, height=76, style='My.TFrame')
         self.sf['relief']='sunken'
 
         self.menutree = Treeview(self)
@@ -468,13 +508,18 @@ class StartFrame(Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(6, weight=1)
         #window placements
-
-        self.progress.grid(column=1, row=9, columnspan=3)
-        self.wl.grid(column=2, row=3, sticky='N')
-        self.ns.grid(column=2, row=4)
-        self.rs.grid(column=1, row=1,sticky='NW')
-        self.menutree.grid(column=1, row=1,rowspan=8, sticky='NWS')
-
+        self.sf.pack()
+        self.sf.place(x=298, y=162)
+        self.wl.pack()
+        self.wl.place(x=300,y=165)
+        self.ns.pack()
+        self.ns.place(x=300, y= 200)
+        self.rs.pack()
+        self.rs.place(x=0, relwidth=.25)
+        self.menutree.pack()
+        self.menutree.place(x=0, relwidth=.25, relheight=.98)
+        self.progress.pack()
+        self.progress.place(y=440)
 
         self.bytes = 0
         self.maxbytes = 0
@@ -488,7 +533,7 @@ class StartFrame(Frame):
 
     def read_bytes(self):
         '''simulate reading 500 bytes; update progress bar'''
-        self.bytes += 1000
+        self.bytes += 1500
         self.progress["value"] = self.bytes
         if self.bytes < self.maxbytes:
             # read more bytes after 100 ms

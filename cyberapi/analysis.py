@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 class Analyzer():
 
     def __init__(self):
-        self.nlp = spacy.load('en')
+        #self.nlp = spacy.load('en')
         self.exclude_words = {
         '’s':1, 'krebsonsecurity':1, 'threatpost':1, 'darkreading':1, 'reading':1, 'chris gonsalves':1,
         'mike mimoso':1, 'chris brook':1, 'dennis fisher':1, 'dark reading':1, 'reuters':1
