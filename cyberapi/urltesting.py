@@ -86,9 +86,10 @@ class SearchFrame(Frame):
         self.ent_keyword.bind('<Key>', lambda event: self.callEnable(event, 'DefaultSearch'))
 
         self.var = IntVar()
-        self.check_filter = Checkbutton(self, text="Advanced Filter", variable=self.var, command=self.filter_op, font="Veranda 16")
+        self.var.set(0)
+        self.check_filter = Checkbutton(self, text="Advanced Filter", variable=self.var, onvalue=1, offvalue=0, command=self.filter_op, font="Veranda 16")
 
-        if not self.var.get():
+        if self.var.get() is 0:
             self.but_search = Button(self, text='Search', width=15, state='disable', font="Veranda 16", command=lambda: self.search(
                 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitlebody&title='
                 + self.ent_keyword.get() + '&body=' + self.ent_keyword.get()))
@@ -135,7 +136,7 @@ class SearchFrame(Frame):
         self.but_search.configure(state='disable')
     #filter options populate uppon check box of Advanced search option
     def filter_op(self):
-        if self.var.get():
+        if self.var.get() == 1:
             #appearing
             self.appearing_label = Label(self, text='Appearing In:', background='#282828', font=15, foreground='#5DE0DC')
             self.box_value = StringVar()
@@ -190,7 +191,7 @@ class SearchFrame(Frame):
             self.fD_ent2.place(x=625, y=505+offset)
 
             # if the button gets unchecked it will destroy the labels and entry widgets.
-        else:
+        elif self.var.get() == 0:
             self.appearing_label.destroy()
             self.box.destroy()
             self.author_label.destroy()
@@ -235,39 +236,40 @@ class SearchFrame(Frame):
         self.ent_keyword.place(relx=.5, rely=.5, anchor=CENTER)
         self.check_filter.place(relx=.495, rely=.6, relheight=.059, anchor=E)
         self.but_search.place(relx=.505, rely=.6, anchor=W)
-        if hasattr(self, 'appearing_label'):
+        offset = 100
+        if self.var.get() == 1:
             # window placements
             # appearing labael
-            self.appearing_label.place(x=400, y=380)
+            self.appearing_label.place(x=400, y=380+offset)
             # appearing pick
-            self.box.place(x=510, y=380)
+            self.box.place(x=510, y=380+offset)
             # author label
-            self.author_label.place(x=400, y=405)
+            self.author_label.place(x=400, y=405+offset)
             # author entry
-            self.author_entry.place(x=510, y=405)
+            self.author_entry.place(x=510, y=405+offset)
             # subjectivity
-            self.fsub_label.place(x=400, y=430)
-            self.fsub_nv.place(x=510, y=430)
-            self.fsub_gt.place(x=510, y=455)
-            self.fsub_lt.place(x=510, y=480)
+            self.fsub_label.place(x=400, y=430+offset)
+            self.fsub_nv.place(x=510, y=430+offset)
+            self.fsub_gt.place(x=510, y=455+offset)
+            self.fsub_lt.place(x=510, y=480+offset)
 
             # date
-            self.fD_label.place(x=400, y=505)
-            self.fD_format.place(x=440, y=507)
-            self.fD_beinlab.place(x=510, y=505)
-            self.fD_ent.place(x=555, y=505)
-            self.fD_endlab.place(x=590, y=505)
-            self.fD_ent2.place(x=625, y=505)
+            self.fD_label.place(x=400, y=505+offset)
+            self.fD_format.place(x=440, y=507+offset)
+            self.fD_beinlab.place(x=510, y=505+offset)
+            self.fD_ent.place(x=555, y=505+offset)
+            self.fD_endlab.place(x=590, y=505+offset)
+            self.fD_ent2.place(x=625, y=505+offset)
 
     #hides the widgets to display the search results
     def hideshit(self):
         self.ent_keyword.place_forget()
         self.check_filter.place_forget()
         self.but_search.place_forget()
-        if hasattr(self, 'appearing_label'):
-            self.ent_keyword.place(x=(-100), y=(-100))
-            self.check_filter.place(x=(-100), y=(-100))
-            self.but_search.place(x=(-100), y=(-100))
+        if self.var.get() == 1:
+            # self.ent_keyword.place(x=(-100), y=(-100))
+            # self.check_filter.place(x=(-100), y=(-100))
+            # self.but_search.place(x=(-100), y=(-100))
             self.appearing_label.place(x=(-100), y=(-100))
             self.box.place(x=(-100), y=(-100))
             self.author_label.place(x=(-100), y=(-100))
@@ -476,7 +478,6 @@ class SearchFrame(Frame):
             self.but_search.configure(state='normal')
         else:
             self.but_search.configure(state='disabled')
-
 
 class StartFrame(Frame):
     def __init__(self, parent, controller):
