@@ -68,7 +68,7 @@ class SearchFrame(Frame):
         self.title = "Article Search"  # ttile of the window
 
         #title
-        path = 'crawler.jpg'
+        path = 'cyspider.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
         self.panel.pack()
