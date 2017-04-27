@@ -18,13 +18,15 @@ from dateutil import parser
 from PIL import ImageTk, Image
 import os
 
+savedjsondata = []
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         self.title("Article Searcher")       #Title of window
         #set the frame dimentions and pack the parent window
         container = Frame(self)
-        menu = makemenu.MenuMaker2000(self).createMenu()
+        #menu = makemenu.MenuMaker2000(self).createMenu()
+        makemenu.MenuMaker2000(self).createMenu()
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -58,7 +60,6 @@ class SearchFrame(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-
         self.analyzer = analysis.Analyzer()
 
         self.controller = controller  # set the controller
@@ -71,7 +72,6 @@ class SearchFrame(Frame):
         self.panel.pack()
         self.searchwindow()
 
-    #search window populates the window with widgets for searching
     def searchwindow(self):
         #keyword entry
         self.largefont = ('Veranda', 15)
@@ -100,7 +100,6 @@ class SearchFrame(Frame):
         #check button
         self.check_filter.place(x=400, y=350)
     #todo if the user selects to load a search it will simply jump to results
-
     def searchButton(self,event):
         if self.box.current() is 0:
             self.but_search = Button(self, text='Search', width=15, state='disable', command=lambda: self.search(
@@ -254,7 +253,6 @@ class SearchFrame(Frame):
             self.fD_ent.place(x=555, y=505)
             self.fD_endlab.place(x=590, y=505)
             self.fD_ent2.place(x=625, y=505)
-
     #hides the widgets to display the search results
     def hideshit(self):
         self.ent_keyword.place(x=(-100), y=(-100))
@@ -278,10 +276,8 @@ class SearchFrame(Frame):
             self.fD_beinlab.place(x=(-100), y=(-100))
             self.fD_endlab.place(x=(-100), y=(-100))
             self.fD_ent2.place(x=(-100), y=(-100))
-
     #search for that almighty data mine.
     def search(self, url):
-        print(url)
         if self.var.get():
             au = self.author_entry.get()
             au = au.replace(' ', '+')
@@ -296,10 +292,8 @@ class SearchFrame(Frame):
         else:
             url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
 
-        print(url)
+        #print(url)
         self.data = requests.get(url).json()
-        #print(data)
-
         self.hideshit()
         self.tree = Treeview(self)
         self.tree.heading('#0', text='Results by Title')
@@ -364,7 +358,6 @@ class SearchFrame(Frame):
     def EditSearch(self):
         self.deletesearch()
         self.undohide()
-
     def saveMenu(self):
         # create main directory and subdir(current date) if not made already
         path = os.getcwd() + "/Sessions/" + str(datetime.date.today())
@@ -380,8 +373,6 @@ class SearchFrame(Frame):
                 json.dump(self.data, outfile)
             # with open(filename, 'w') as f:
             #     f.write("Testing Save As/No Current Save")
-
-
     #defind clear search
     def deletesearch(self):
         self.tree.destroy()
@@ -391,14 +382,12 @@ class SearchFrame(Frame):
         self.new_search.destroy()
         self.edit_search.destroy()
         self.save_search.destroy()
-
     #on click gets the articles information and displays it in the Key Article Subjects window
     def on_single_click(self, event):
         self.topicsHead.config(text="Key Article Subjects")
         item = self.tree.item(self.tree.selection()[0], 'values')
         topicStr = ', '.join(self.analyzer.getMostCommonNounPhrases(5, [item[1]])) + '\n'
         self.topics.config(text=topicStr)
-
     #on d click will open the article for display
     def on_click(self, event):
         item = self.tree.selection()[0]
@@ -424,10 +413,8 @@ class SearchFrame(Frame):
     # op_link "double click on the link at the top of the page opens up the url link
     def op_link(self, event):
         webbrowser.open_new(self.n[0])
-
     def callEnable(self, event, searchType):
         self.after(100, lambda: self.enableSearch(event, searchType))
-
     # event bind when Return is entered after a title keyword is entered will enable the search button.
     def enableSearch(self, event, searchType):
         string = ''
@@ -448,7 +435,7 @@ class SearchFrame(Frame):
 class StartFrame(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        container = Frame(self)
+        #container = Frame(self)
         self.controller = controller  # set the controller
         self.title = "CreepyCrawler"              #ttile of the window
 
@@ -493,6 +480,7 @@ class StartFrame(Frame):
         self.bytes = 0
         self.maxbytes = 0
         self.openMenu()
+
     def openMenu(self):
         # set initial directory to savedScans folder
         path = os.path.join(os.getcwd(), "Sessions")
@@ -506,10 +494,11 @@ class StartFrame(Frame):
             psr = os.listdir(path)
             for f in psr:
                 filetoprint = f.replace('.txt', '')
-                self.menutree.insert('', 'end', text='  -'+filetoprint, values=f, tags='article')
+                filetosend = f#.replace(' ', '')
+                self.menutree.insert('', 'end', text='  -'+filetoprint, values=(file,filetosend), tags='article')
                 self.menutree.tag_configure('article', background='#434343', foreground='#06c8e6')
                 #print(file)
-        self.menutree.bind('<1>', self.onmenuclick)
+            self.menutree.bind('<<TreeviewSelect>>', self.onmenuclick)
 
         #fill tree with greay past files
         for i in range(1,20):
@@ -517,20 +506,16 @@ class StartFrame(Frame):
             self.menutree.tag_configure('clean', background='#434343')
 
     def onmenuclick(self, event):
-        item = self.menutree.selection()
-        self.n = self.menutree.item(item)
-        print(self.n)
+        item = self.menutree.item(self.menutree.selection()[0], 'values')
+        path = 'Sessions'+'\\'+item[0]+'\\'+item[1]
+        with open(path, "rb") as fin:
+            self.content = json.load(fin)
+        #print(self.content)
+        xoffset = int(self.winfo_screenwidth() / 2 - 1280 / 2)
+        yoffset = int(self.winfo_screenheight() / 2 - 800 / 2)
+        self.controller.geometry("%dx%d+%d+%d" % (1100, 700, xoffset, yoffset))  # set geometry of window
+        self.controller.show_frame('SearchFrame')
 
-        # path = os.path.join(os.getcwd(), 'Sessions'+'\\'+file)
-        # filenames = os.listdir(path)
-        # print(filenames)
-
-        # path = os.path.join(os.getcwd(), "Sessions")
-        # if not os.path.exists(path):
-        #     os.makedirs(path)
-        # filename = filedialog.askopenfilename(initialdir=path)
-        # if os.path.exists(path + filename):
-        #     self.saveFilename = filename
 
     #little display load bar for visual effect :P
     def start(self, event):
