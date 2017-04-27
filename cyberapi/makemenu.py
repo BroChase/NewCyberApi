@@ -112,5 +112,4 @@ class MenuMaker2000():
             document.save('export.docx')
 
     def aboutMenu(self):
-        messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n"
-                                     "Refer to README for additional info.")
+        messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n""Refer to README for additional info.")
