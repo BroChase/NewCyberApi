@@ -61,6 +61,7 @@ class cyberapi(Tk):
         self.title(newTitle)
 
 class SearchFrame(Frame):
+    content = None
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
@@ -328,13 +329,16 @@ class SearchFrame(Frame):
         # queue to share between gui and threads
         q = queue.Queue()
 
-        # start thread to get data from url
-        thread = GetDataThread(url, q)
-        thread.start()
+        if SearchFrame.content == None:
+            # start thread to get data from url
+            thread = GetDataThread(url, q)
+            thread.start()
 
-        # wait until thread is done, then get data from queue
-        self.updateuntildata(q, self.searchprogress)
-        self.data = q.get(0)
+            # wait until thread is done, then get data from queue
+            self.updateuntildata(q, self.searchprogress)
+            self.data = q.get(0)
+        else:
+            self.data = SearchFrame.content
 
         # make sure search didn't time out
         if self.data != "ReadTimeout":
@@ -630,12 +634,15 @@ class StartFrame(Frame):
         item = self.menutree.item(self.menutree.selection()[0], 'values')
         path = 'Sessions'+'\\'+item[0]+'\\'+item[1]
         with open(path, "r") as fin:
-            self.content = json.load(fin)
-        #print(self.content)
+            SearchFrame.content = json.load(fin)
+        print(SearchFrame.content)
         xoffset = int(self.winfo_screenwidth() / 2 - 1280 / 2)
         yoffset = int(self.winfo_screenheight() / 2 - 800 / 2)
         self.controller.geometry("%dx%d+%d+%d" % (1100, 700, xoffset, yoffset))  # set geometry of window
         self.controller.show_frame('SearchFrame')
+        self.master.master.analyzer.loadSpacy()
+        self.master.master.frames['SearchFrame'].hideshit()
+        self.master.master.frames['SearchFrame'].search('')
 
     def start(self, event):
         self.progress["value"] = 0
