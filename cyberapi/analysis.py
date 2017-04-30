@@ -1,60 +1,74 @@
 from collections import Counter
 import spacy
 from difflib import SequenceMatcher
-
+import time
+# class to implement spaCy nlp and do text analysis
 class Analyzer():
     nlp = None
 
     def __init__(self):
-        nlp = None
+        # words to exclude from noun phrases nlp finds
         self.exclude_words = {
         '’s':1, 'krebsonsecurity':1, 'threatpost':1, 'darkreading':1, 'reading':1, 'chris gonsalves':1,
-        'mike mimoso':1, 'chris brook':1, 'dennis fisher':1, 'dark reading':1, 'reuters':1
+        'mike mimoso':1, 'chris brook':1, 'dennis fisher':1, 'dark reading':1, 'reuters':1, 'ip':1, 'update':1
     }
 
+    # takes a while, allows class to be created and this to be called later
     def loadSpacy(self):
         import spacy
         Analyzer.nlp = spacy.load('en')
 
+    # main processing algorithm
     def getMostCommonNounPhrases(self, maxphrases, articles):
+        # indiv keeps track of each article phrases, total is for all articles passed in
         indivMostCommon = Counter()
         totalMostCommon = Counter()
-        for article in articles:
+        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=10000):
             indivMostCommon.clear()
-            doc = Analyzer.nlp(article)
+
+            # want totalMostCommon to only keep unique phrases from each article..more accurate
             unique = set()
 
             for phrase in doc.noun_chunks:
                 foundproper = False
                 propphrase = ''
 
+                # only want to keep track of proper nouns that aren't a date time or person
                 for word in phrase:
                     if word.pos_ == "PROPN" and word.pos_ != "DET" and word.text != "'s" \
                             and word.ent_type_ not in "DATE TIME PERSON PART" \
                             and word.text.lower() not in self.exclude_words:
                         foundproper = True
                         propphrase = (propphrase + ' ' + word.text).strip()
+
+                # found a phrase with a proper noun, now make sure it hasn't been added already
                 if foundproper == True:
+                    if propphrase in ["US", "U.S.", "United States"]:
+                        propphrase = "United States"
                     foundsimilar = False
 
                     for commonphrase in indivMostCommon.elements():
+                        # if it has been added already, just incrase the count
                         if propphrase == self.getpropns(commonphrase):
                             indivMostCommon.update([commonphrase])
                             unique.add(commonphrase)
                             foundsimilar = True
                             break
 
+                    # otherwise add a new instance of it to the counter
                     if not foundsimilar:
                         indivMostCommon.update([propphrase])
                         unique.add(propphrase)
 
             totalMostCommon.update(unique)
 
+        # handle returning differently based on the amount of articles passed in
         if len(articles) == 1:
             return [phrase for phrase in indivMostCommon.most_common(maxphrases)]
         else:
             return [phrase for phrase in totalMostCommon.most_common(maxphrases)]
 
+    # reduces a phrase down to just proper nouns as sort of an identifier to see if it is in the counter already
     def getpropns(self, phrase):
         doc = Analyzer.nlp(phrase)
         string = ''
