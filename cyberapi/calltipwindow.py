@@ -1,4 +1,5 @@
 from tkinter import TclError, Label, LEFT, SOLID, Toplevel
+id = None
 class ToolTip(object):
 
     def __init__(self, widget):
@@ -38,9 +39,14 @@ class ToolTip(object):
 
 def createToolTip(widget, text):
     toolTip = ToolTip(widget)
+    id = None
     def enter(event):
-        toolTip.showtip(text)
+        nonlocal id
+        id = widget.master.after(2000, lambda: toolTip.showtip(text))
     def leave(event):
+        nonlocal id
+        widget.master.after_cancel(id)
         toolTip.hidetip()
+
     widget.bind('<Enter>', enter)
     widget.bind('<Leave>', leave)
