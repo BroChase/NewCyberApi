@@ -61,6 +61,7 @@ class cyberapi(Tk):
         self.title(newTitle)
 
 class SearchFrame(Frame):
+    content = None
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
@@ -75,6 +76,8 @@ class SearchFrame(Frame):
         self.panel = Label(self, image=self.img)
         self.panel.pack()
         self.searchwindow()
+
+
 
     #search window populates the window with widgets for searching
     def searchwindow(self):
@@ -303,6 +306,96 @@ class SearchFrame(Frame):
             self.fD_ent2.place(x=(-100), y=(-100))
     # adding comment
     #search for that almighty data mine.
+    def oldsearch(self):
+        self.searchprogress = Progressbar(self, orient="horizontal", style='mongo.Horizontal.TProgressbar', length=700,
+                                          mode="indeterminate")
+        self.searchprogress.place(relx=.5, rely=.8, anchor=CENTER)
+        self.searchprogress.start()
+        self.proglabel = Label(self, text="Fetching Results...", font="Times 14", bg="#282828", fg="#FFFFFF")
+        self.proglabel.place(relx=.5, rely=.765, anchor=CENTER)
+        # queue to share between gui and threads
+        q = queue.Queue()
+        self.data = SearchFrame.content
+        # make sure search didn't time out
+        if self.data != "ReadTimeout":
+            # change label info to next task
+            self.proglabel.config(text="Analyzing Data...")
+            self.update()
+
+            self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
+            self.sf2['relief'] = 'sunken'
+
+            self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
+                                      background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
+            self.master.master.updateque.queue.clear()
+
+            # start thread to analyze data and repeat process
+            analysisthread = ResultsAnalysisThread(self.data, self.master.master.analyzer, q, self.resultTopics)
+            analysisthread.start()
+            self.processingloop('percent')
+            self.processingloop('dots')
+
+            # stop the progress bar
+            self.searchprogress.stop()
+
+            self.hideshit()
+            style = Style(self)
+            style.configure("Treeview", rowheight=30)
+            self.tree = Treeview(self)
+            self.tree.heading('#0', text='Results by Title')
+            self.tree.column('#0', stretch=True)
+            self.tree.place(relx=.3, relheight=1, relwidth=.7)
+
+            # sunken box that topics print out into
+            self.style = Style()
+            self.style.configure('My.TFrame', background='#383838')
+
+            # frame for individual analysis
+            self.sf = Frame(self, width=550, height=150, style='My.TFrame')
+            self.sf['relief'] = 'sunken'
+            self.sf.place(relx=0, rely=.055, relwidth=.3, relheight=.4)
+
+            # labels for article topics
+            self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
+                                    foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
+            self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
+                                background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
+
+            self.topicsHead.place(relx=.01, rely=.01, relwidth=.28)
+            self.topics.place(relx=.01, rely=.065, relwidth=.28)
+
+            # frame for results analysis
+            self.sf2.place(relx=0, rely=.51, relwidth=.3, relheight=.4)
+
+            self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
+                                         background='#282828', foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.resultTopicHead,
+                                        "These are the most mentioned phrases in the resulting articles.")
+
+            self.resultTopicHead.place(relx=.01, rely=.465, relwidth=.28)
+            self.resultTopics.place(relx=.01, rely=.52, relwidth=.28)
+
+            # New Search Edit Search Save Search
+            self.new_search = Button(self, text='New Search', background='#383838', foreground='#5DE0DC',
+                                     font=("Veranda 14"), command=self.NewSearch2)
+
+
+            for item in self.data:
+                # remove BOM images first from body >uffff
+                item['body'] = ''.join(c for c in unicodedata.normalize('NFC', item['body']) if c <= '\uFFFF')
+                self.tree.insert('', 'end', text=item['title'], values=(item['uri'], item['body'], item['title'],
+                                                                        item['author'],
+                                                                        parser.parse(item['date']).strftime(
+                                                                            '%B, %d, %Y')), tag='data')
+            self.tree.tag_configure('data', font='Verdana 14')
+            self.tree.bind('<Double-1>', self.on_click)
+            self.tree.bind('<<TreeviewSelect>>', self.on_single_click)
+            self.new_search.place(relx=0, rely=.95, relwidth=.1, relheight=.05, anchor=NW)
+        self.searchprogress.destroy()
+        self.proglabel.destroy()
+
+
     def search(self, url):
         self.searchprogress = Progressbar(self, orient="horizontal", style='mongo.Horizontal.TProgressbar', length=700, mode="indeterminate")
         self.searchprogress.place(relx=.5, rely=.8, anchor=CENTER)
@@ -328,6 +421,7 @@ class SearchFrame(Frame):
         # queue to share between gui and threads
         q = queue.Queue()
 
+        #if SearchFrame.content == None:
         # start thread to get data from url
         thread = GetDataThread(url, q)
         thread.start()
@@ -335,6 +429,8 @@ class SearchFrame(Frame):
         # wait until thread is done, then get data from queue
         self.updateuntildata(q, self.searchprogress)
         self.data = q.get(0)
+        # else:
+        #     self.data = SearchFrame.content
 
         # make sure search didn't time out
         if self.data != "ReadTimeout":
@@ -437,6 +533,10 @@ class SearchFrame(Frame):
         self.searchprogress.destroy()
         self.proglabel.destroy()
 
+    def NewSearch2(self):
+        self.deleteoldsearch()
+        self.searchwindow()
+
     def NewSearch(self):
         self.deletesearch()
         self.searchwindow()
@@ -475,6 +575,15 @@ class SearchFrame(Frame):
         self.edit_search.destroy()
         self.save_search.destroy()
 
+    def deleteoldsearch(self):
+        self.tree.destroy()
+        self.sf.destroy()
+        self.topicsHead.destroy()
+        self.topics.destroy()
+        self.sf2.destroy()
+        self.resultTopicHead.destroy()
+        self.resultTopics.destroy()
+        self.new_search.destroy()
     #on click gets the articles information and displays it in the Key Article Subjects window
     def on_single_click(self, event):
         self.topicsHead.config(text="Key Article Subjects")
@@ -630,12 +739,15 @@ class StartFrame(Frame):
         item = self.menutree.item(self.menutree.selection()[0], 'values')
         path = 'Sessions'+'\\'+item[0]+'\\'+item[1]
         with open(path, "r") as fin:
-            self.content = json.load(fin)
-        #print(self.content)
+            SearchFrame.content = json.load(fin)
+        #print(SearchFrame.content)
         xoffset = int(self.winfo_screenwidth() / 2 - 1280 / 2)
         yoffset = int(self.winfo_screenheight() / 2 - 800 / 2)
         self.controller.geometry("%dx%d+%d+%d" % (1100, 700, xoffset, yoffset))  # set geometry of window
         self.controller.show_frame('SearchFrame')
+        self.master.master.analyzer.loadSpacy()
+        self.master.master.frames['SearchFrame'].hideshit()
+        self.master.master.frames['SearchFrame'].oldsearch()
 
     def start(self, event):
         self.progress["value"] = 0
