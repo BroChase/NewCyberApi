@@ -18,6 +18,8 @@ import textwrap
 import time
 import threading
 import queue
+import calltipwindow
+
 
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
@@ -81,13 +83,14 @@ class SearchFrame(Frame):
         self.ent_keyword = Entry(self, width=40, relief='raised', font=self.largefont, bd=1)
         #todo <Return> and entry is not empty call search()
 
-
+        calltipwindow.createToolTip(self.ent_keyword, "Enter a word or phrase here to search by. E.x. Microsoft Word")
         self.ent_keyword.bind('<Escape>', self.clear_text)
         self.ent_keyword.bind('<Key>', lambda event: self.callEnable(event, 'DefaultSearch'))
 
         self.var = IntVar()
         self.var.set(0)
         self.check_filter = Checkbutton(self, text="Advanced Filter", onvalue=1, offvalue=0, variable=self.var, command=self.filter_op, font="Veranda 16")
+        calltipwindow.createToolTip(self.check_filter, "Click here to narrow your search")
 
         if not self.var.get():
             self.but_search = Button(self, text='Search', width=15, state='disable', font="Veranda 16", command=lambda: self.search(
@@ -133,19 +136,35 @@ class SearchFrame(Frame):
             self.appearing_label = Label(self, text='Appearing In:', background='#282828', font=15, foreground='#5DE0DC')
             self.box_value = StringVar()
             self.box = Combobox(self, textvariable=self.box_value)
+            calltipwindow.createToolTip(self.appearing_label, "Select where you want us to search "
+                                                              "for your provided search phrase")
+            calltipwindow.createToolTip(self.box, "Select where you want us to search "
+                                                              "for your provided search phrase")
             self.box['values'] = ('Default', 'Title', 'Body', 'URL')
             self.box.current(0)
             self.box.bind('<<ComboboxSelected>>', self.searchButton)
             #author
             self.author_label = Label(self, text='Author:',background='#282828', font=15, foreground='#5DE0DC')
             self.author_entry = Entry(self, width=22, bd=2, background='#9A9A9A')
+            calltipwindow.createToolTip(self.author_label,
+                                        "Like a particular author? Enter his first or last name here "
+                                        "to only return articles written by that person")
+            calltipwindow.createToolTip(self.author_entry,
+                                        "Like a particular author? Enter his first or last name here "
+                                        "to only return articles written by that person")
             #subjectivity
             self.fsub_label = Label(self, text='Subjectivity:',background='#282828', font=15, foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.fsub_label, "Choose an option here if you only want to see articles"
+                                                              " that are more objectively or subjectively written")
             self.var2 = IntVar()
             self.var2.set(1)
             self.fsub_nv = Radiobutton(self, text="Don't Care", variable=self.var2, value=1, background='#282828', foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.fsub_nv, "Select this if you want all articles returned regarless of how they are written")
             self.fsub_gt = Radiobutton(self, text='More Subjective', variable=self.var2, value=2, background='#282828', foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.fsub_gt, "Articles written in a more personal way")
             self.fsub_lt = Radiobutton(self, text='More Objective', variable=self.var2, value=3, background='#282828', foreground='#5DE0DC')
+
+            calltipwindow.createToolTip(self.fsub_lt, "Articles written in a more objective way")
             #date
             self.fD_label = Label(self, text='Date:',background='#282828', font=15, foreground='#5DE0DC')
             self.fD_format = Label(self, text='00/00/0000', background='#282828',foreground='#BBBBBB')
@@ -156,6 +175,14 @@ class SearchFrame(Frame):
             self.fD_ent.insert('end', '01/01/0001')
             self.fD_ent2 = Entry(self, width=10, bd=2, background='#9A9A9A')
             self.fD_ent2.insert('end', strftime('%m/%d/%Y'))
+
+            calltipwindow.createToolTip(self.fD_label, "Narrow your results to articles published in the dates here")
+            calltipwindow.createToolTip(self.fD_format, "Narrow your results to articles published in the dates here")
+            calltipwindow.createToolTip(self.fD_beinlab, "Narrow your results to articles published in the dates here")
+            calltipwindow.createToolTip(self.fD_endlab, "Narrow your results to articles published in the dates here")
+            calltipwindow.createToolTip(self.fD_ent, "Start Date")
+            calltipwindow.createToolTip(self.fD_ent2, "End Date")
+
 
 
         # window placements
@@ -300,6 +327,7 @@ class SearchFrame(Frame):
         else:
             url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
 
+        print(url)
         # queue to share between gui and threads
         q = queue.Queue()
 
