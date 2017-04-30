@@ -6,12 +6,13 @@ import time
 class Analyzer():
     nlp = None
 
-    def __init__(self):
+    def __init__(self, updateque):
         # words to exclude from noun phrases nlp finds
         self.exclude_words = {
-        '’s':1, 'krebsonsecurity':1, 'threatpost':1, 'darkreading':1, 'reading':1, 'chris gonsalves':1,
+        '’s':1, 'krebsonsecurity':1, 'threatpost':1, 'darkreading':1, 'reading':1, 'chris gonsalves':1, "its":1,
         'mike mimoso':1, 'chris brook':1, 'dennis fisher':1, 'dark reading':1, 'reuters':1, 'ip':1, 'update':1
     }
+        self.updateque = updateque
 
     # takes a while, allows class to be created and this to be called later
     def loadSpacy(self):
@@ -23,23 +24,31 @@ class Analyzer():
         # indiv keeps track of each article phrases, total is for all articles passed in
         indivMostCommon = Counter()
         totalMostCommon = Counter()
-        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=10000):
+        count = 0
+        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=int(len(articles)/8)):
+            count += 1
+            if self.updateque.empty() and len(articles) > 1:
+                self.updateque.put(int(count*100/len(articles)))
+
+
             indivMostCommon.clear()
 
             # want totalMostCommon to only keep unique phrases from each article..more accurate
             unique = set()
-
             for phrase in doc.noun_chunks:
                 foundproper = False
                 propphrase = ''
-
+                strippedphrase = ''
                 # only want to keep track of proper nouns that aren't a date time or person
                 for word in phrase:
-                    if word.pos_ == "PROPN" and word.pos_ != "DET" and word.text != "'s" \
-                            and word.ent_type_ not in "DATE TIME PERSON PART" \
+                    if word.text != "'s" and word.ent_type_ not in "DATE TIME PERSON PART" \
                             and word.text.lower() not in self.exclude_words:
-                        foundproper = True
-                        propphrase = (propphrase + ' ' + word.text).strip()
+                        if word.pos_ == "PROPN":
+                            foundproper = True
+                            propphrase = (propphrase + ' ' + word.text).strip()
+
+                        if word.pos_ != "DET":
+                            strippedphrase = (strippedphrase + ' ' + word.text).strip()
 
                 # found a phrase with a proper noun, now make sure it hasn't been added already
                 if foundproper == True:
@@ -48,16 +57,18 @@ class Analyzer():
                     foundsimilar = False
 
                     for commonphrase in indivMostCommon.elements():
-                        # if it has been added already, just incrase the count
-                        if propphrase == self.getpropns(commonphrase):
-                            indivMostCommon.update([commonphrase])
-                            unique.add(commonphrase)
-                            foundsimilar = True
-                            break
+                        if propphrase.split()[0] in commonphrase:
+                        # if it has been added already, just increase the count
+                            newphrase = self.getpropns(commonphrase)
+                            if propphrase == newphrase:
+                                indivMostCommon.update([commonphrase])
+                                unique.add(commonphrase)
+                                foundsimilar = True
+                                break
 
                     # otherwise add a new instance of it to the counter
                     if not foundsimilar:
-                        indivMostCommon.update([propphrase])
+                        indivMostCommon.update([strippedphrase])
                         unique.add(propphrase)
 
             totalMostCommon.update(unique)
