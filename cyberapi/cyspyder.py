@@ -28,7 +28,8 @@ class cyberapi(Tk):
         #set the frame dimentions and pack the parent window
         container = Frame(self)
         menu = makemenu.MainMenu(self).createMenu()
-        self.analyzer = analysis.Analyzer()
+        self.updateque = queue.Queue()
+        self.analyzer = analysis.Analyzer(self.updateque)
 
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -60,11 +61,10 @@ class cyberapi(Tk):
         self.title(newTitle)
 
 class SearchFrame(Frame):
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.analyzer = analysis.Analyzer()
+        #self.analyzer = analysis.Analyzer(self.updateque)
 
         self.controller = controller  # set the controller
         self.title = "Article Search"  # ttile of the window
@@ -83,14 +83,14 @@ class SearchFrame(Frame):
         self.ent_keyword = Entry(self, width=40, relief='raised', font=self.largefont, bd=1)
         #todo <Return> and entry is not empty call search()
 
-        calltipwindow.createToolTip(self.ent_keyword, "Enter a word or phrase here to search by. E.x. Microsoft Word")
+        calltipwindow.createToolTip(self.ent_keyword, "Enter a word or phrase here to search by.")
         self.ent_keyword.bind('<Escape>', self.clear_text)
         self.ent_keyword.bind('<Key>', lambda event: self.callEnable(event, 'DefaultSearch'))
 
         self.var = IntVar()
         self.var.set(0)
         self.check_filter = Checkbutton(self, text="Advanced Filter", onvalue=1, offvalue=0, variable=self.var, command=self.filter_op, font="Veranda 16")
-        calltipwindow.createToolTip(self.check_filter, "Click here to narrow your search")
+        calltipwindow.createToolTip(self.check_filter, "Click here for options to narrow your search")
 
         if not self.var.get():
             self.but_search = Button(self, text='Search', width=15, state='disable', font="Veranda 16", command=lambda: self.search(
@@ -137,9 +137,9 @@ class SearchFrame(Frame):
             self.box_value = StringVar()
             self.box = Combobox(self, textvariable=self.box_value)
             calltipwindow.createToolTip(self.appearing_label, "Select where you want us to search "
-                                                              "for your provided search phrase")
+                                                              "for your provided search phrase.")
             calltipwindow.createToolTip(self.box, "Select where you want us to search "
-                                                              "for your provided search phrase")
+                                                              "for your provided search phrase.")
             self.box['values'] = ('Default', 'Title', 'Body', 'URL')
             self.box.current(0)
             self.box.bind('<<ComboboxSelected>>', self.searchButton)
@@ -147,11 +147,9 @@ class SearchFrame(Frame):
             self.author_label = Label(self, text='Author:',background='#282828', font=15, foreground='#5DE0DC')
             self.author_entry = Entry(self, width=22, bd=2, background='#9A9A9A')
             calltipwindow.createToolTip(self.author_label,
-                                        "Like a particular author? Enter his first or last name here "
-                                        "to only return articles written by that person")
+                                        "Enter an author's first and/or last name (not case-sensitive).")
             calltipwindow.createToolTip(self.author_entry,
-                                        "Like a particular author? Enter his first or last name here "
-                                        "to only return articles written by that person")
+                                        "Enter an author's first and/or last name (not case-sensitive).")
             #subjectivity
             self.fsub_label = Label(self, text='Subjectivity:',background='#282828', font=15, foreground='#5DE0DC')
             calltipwindow.createToolTip(self.fsub_label, "Choose an option here if you only want to see articles"
@@ -159,12 +157,12 @@ class SearchFrame(Frame):
             self.var2 = IntVar()
             self.var2.set(1)
             self.fsub_nv = Radiobutton(self, text="Don't Care", variable=self.var2, value=1, background='#282828', foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.fsub_nv, "Select this if you want all articles returned regarless of how they are written")
+            calltipwindow.createToolTip(self.fsub_nv, "Select this if you want all articles returned regarless of how they are written.")
             self.fsub_gt = Radiobutton(self, text='More Subjective', variable=self.var2, value=2, background='#282828', foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.fsub_gt, "Articles written in a more personal way")
+            calltipwindow.createToolTip(self.fsub_gt, "Select this if you only want articles that are more subjectively written.")
             self.fsub_lt = Radiobutton(self, text='More Objective', variable=self.var2, value=3, background='#282828', foreground='#5DE0DC')
 
-            calltipwindow.createToolTip(self.fsub_lt, "Articles written in a more objective way")
+            calltipwindow.createToolTip(self.fsub_lt, "Select this if you only want articles that are more objectively written.")
             #date
             self.fD_label = Label(self, text='Date:',background='#282828', font=15, foreground='#5DE0DC')
             self.fD_format = Label(self, text='00/00/0000', background='#282828',foreground='#BBBBBB')
@@ -176,12 +174,12 @@ class SearchFrame(Frame):
             self.fD_ent2 = Entry(self, width=10, bd=2, background='#9A9A9A')
             self.fD_ent2.insert('end', strftime('%m/%d/%Y'))
 
-            calltipwindow.createToolTip(self.fD_label, "Narrow your results to articles published in the dates here")
-            calltipwindow.createToolTip(self.fD_format, "Narrow your results to articles published in the dates here")
-            calltipwindow.createToolTip(self.fD_beinlab, "Narrow your results to articles published in the dates here")
-            calltipwindow.createToolTip(self.fD_endlab, "Narrow your results to articles published in the dates here")
-            calltipwindow.createToolTip(self.fD_ent, "Start Date")
-            calltipwindow.createToolTip(self.fD_ent2, "End Date")
+            calltipwindow.createToolTip(self.fD_label, "Narrow your results to articles published in the dates here.")
+            calltipwindow.createToolTip(self.fD_format, "Narrow your results to articles published in the dates here.")
+            calltipwindow.createToolTip(self.fD_beinlab, "Narrow your results to articles published in the dates here.")
+            calltipwindow.createToolTip(self.fD_endlab, "Narrow your results to articles published in the dates here.")
+            calltipwindow.createToolTip(self.fD_ent, "Enter Start Date here.")
+            calltipwindow.createToolTip(self.fD_ent2, "Enter End Date here.")
 
 
 
@@ -327,7 +325,6 @@ class SearchFrame(Frame):
         else:
             url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
 
-        print(url)
         # queue to share between gui and threads
         q = queue.Queue()
 
@@ -345,10 +342,18 @@ class SearchFrame(Frame):
             self.proglabel.config(text="Analyzing Data...")
             self.update()
 
+            self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
+            self.sf2['relief'] = 'sunken'
+
+            self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
+                                      background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
+            self.master.master.updateque.queue.clear()
+
             # start thread to analyze data and repeat process
-            analysisthread = ResultsAnalysisThread(self.data, self.master.master.analyzer, q)
+            analysisthread = ResultsAnalysisThread(self.data, self.master.master.analyzer, q, self.resultTopics)
             analysisthread.start()
-            self.updateuntildata(q, self.searchprogress)
+            self.processingloop('percent')
+            self.processingloop('dots')
 
             # stop the progress bar
             self.searchprogress.stop()
@@ -373,6 +378,7 @@ class SearchFrame(Frame):
             # labels for article topics
             self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
                                     foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
             self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
                                 background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
 
@@ -381,14 +387,11 @@ class SearchFrame(Frame):
 
 
             # frame for results analysis
-            self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
-            self.sf2['relief'] = 'sunken'
             self.sf2.place(relx=0, rely=.51, relwidth=.3, relheight=.4)
 
             self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
                                          background='#282828', foreground='#5DE0DC')
-            self.resultTopics = Label(self, text='', wraplength=500, font='times 14',
-                                background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
+            calltipwindow.createToolTip(self.resultTopicHead, "These are the most mentioned phrases in the resulting articles.")
 
             self.resultTopicHead.place(relx=.01, rely=.465, relwidth=.28)
             self.resultTopics.place(relx=.01, rely=.52, relwidth=.28)
@@ -414,9 +417,6 @@ class SearchFrame(Frame):
                 self.tree.tag_configure('data', font='Verdana 14')
                 self.tree.bind('<Double-1>', self.on_click)
                 self.tree.bind('<<TreeviewSelect>>', self.on_single_click)
-
-                results = q.get(0)
-                self.resultTopics.config(text=results)
 
 
                 self.new_search.place(relx=0, rely=.95, relwidth=.1, relheight=.05, anchor=NW)
@@ -537,8 +537,23 @@ class SearchFrame(Frame):
         while q.empty():
             time.sleep(.01)
             progress.step(1)
-            progress.update_idletasks()
+            progress.master.update()
 
+    def processingloop(self, updatetype):
+        string = self.resultTopics.cget('text')
+        if len(string) and string[0] == 'P':
+            if updatetype == 'percent':
+                if not self.master.master.updateque.empty():
+                    string = "{}({}%)".format(re.search('Processing Data(\.|\s)*', string).group(0), str(self.master.master.updateque.get(0)))
+                    self.after(300, lambda: self.processingloop('percent'))
+                else:
+                    self.after(100, lambda: self.processingloop('percent'))
+            elif updatetype == 'dots':
+                numdots = len(string.split('.')) % 4
+                string = "Processing Data" + numdots * '.' + (3 - numdots) * ' ' + re.search('\(.+\)', string).group(0)
+                self.after(300, lambda: self.processingloop('dots'))
+
+        self.resultTopics.config(text=string)
 
 class StartFrame(Frame):
     def __init__(self, parent, controller):
@@ -546,7 +561,6 @@ class StartFrame(Frame):
         #container = Frame(self)
         self.controller = controller  # set the controller
         self.title = "CySpyder"              #ttile of the window
-
         path = os.getcwd() + '\\resources\spiderweb2.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
@@ -605,7 +619,6 @@ class StartFrame(Frame):
                 filetosend = f#.replace(' ', '')
                 self.menutree.insert('', 'end', text='  -'+filetoprint, values=(file,filetosend), tags='article')
                 self.menutree.tag_configure('article', background='#434343', foreground='#06c8e6')
-                #print(file)
             self.menutree.bind('<<TreeviewSelect>>', self.onmenuclick)
 
         #fill tree with greay past files
@@ -660,17 +673,17 @@ class GetDataThread(threading.Thread):
             self.queue.put(requests.exceptions.ReadTimeout.__name__)
 
 class ResultsAnalysisThread(threading.Thread):
-    def __init__(self, data, analyzer, q):
+    def __init__(self, data, analyzer, q, widget):
         threading.Thread.__init__(self)
         self.queue = q
         self.data = data
         self.analyzer = analyzer
-
+        self.widget = widget
     def run(self):
         results = '\n\n'.join(
             ['\n'.join(textwrap.wrap('*({}): '.format(phrase[1]) + str(phrase[0]), width=33)) for phrase in
              self.analyzer.getMostCommonNounPhrases(5, [item['body'] for item in self.data])])
-        self.queue.put(results)
+        self.widget.config(text=results)
 
 if __name__ == "__main__":
     app = cyberapi()
