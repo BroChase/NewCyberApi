@@ -626,7 +626,7 @@ class GetDataThread(threading.Thread):
         self.url = url
     def run(self):
         try:
-            data = requests.get(self.url, timeout=5).json()
+            data = requests.get(self.url, timeout=10).json()
             self.queue.put(data)
         except requests.exceptions.ReadTimeout:
             self.queue.put(requests.exceptions.ReadTimeout.__name__)
