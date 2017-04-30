@@ -6,12 +6,12 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
 import requests
-import json
 from docx import Document
-from docx.shared import Inches
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Pt, RGBColor
 
 
-class MenuMaker2000():
+class MainMenu:
     def __init__(self, tkapp):
         self.tkapp = tkapp
         self.saveFilename = None
@@ -24,13 +24,6 @@ class MenuMaker2000():
         filemenu.add_command(label="Open", command=self.openMenu)
         filemenu.add_command(label="Save", command=lambda: self.saveMenu("Save"))
         filemenu.add_command(label="Save As", command=lambda: self.saveMenu("Save As"))
-        filemenu.add_separator()
-
-        exportmenu = Menu(topmenu, tearoff=0)
-        exportmenu.add_command(label="pdf", command=lambda: self.exportMenu("pdf"))
-        exportmenu.add_command(label="docx", command=lambda: self.exportMenu("docx"))
-
-        filemenu.add_cascade(label="Export", menu=exportmenu)
         filemenu.add_separator()
 
         filemenu.add_command(label="Quit", command=self.tkapp.quit)
@@ -74,42 +67,116 @@ class MenuMaker2000():
                 with open(filename, 'w') as f:
                     f.write("Testing Save As/No Current Save")
 
-    def exportMenu(self, filetype):
-        keyword = 'Skype Fixes \u2018SPYKE\u2019 Credential Phishing Remote Execution Bug'
-        url = 'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title={}&author=&sub=&sdate=01/01/0001&edate=04/24/2017'.format(keyword)
-        res = requests.get(url).json()
-        res = res[0]
-        if filetype == 'pdf':
-            style = getSampleStyleSheet()
-            sty = getSampleStyleSheet()['Title']
-            sty.leading = 80
-            pdf = SimpleDocTemplate("export.pdf", pagesize=letter)
-            article = []
-
-            article.append(Spacer(0,inch))
-            article.append(Paragraph("<para fontSize=40 spaceAfter=40>{}</para>".format(res['title']), sty))
-            article.append(Paragraph("<para fontSize=20 align=center>Author: {}</para>".format(res['author']), style['Normal']))
-            article.append(Spacer(0,inch))
-            article.append(Paragraph("<para fontSize=15 align=center spaceAfter=70>Date Published: {}</para>".format(res['date']), style["Normal"]))
-            article.append(
-                Paragraph("<para alignment=center><link fontSize=12 textColor=blue "
-                          "href={}><u>{}</u></link></para>".format(res['uri'], res['uri']),style['Normal']))
-            article.append(PageBreak())
-
-            for para in res['body'].split('\n\n'):
-                article.append(Paragraph(para, style['Normal']))
-                article.append(Spacer(.25*inch, .25*inch))
-            pdf.build(article)
-        if filetype == 'docx':
-            document = Document()
-            document.add_heading(res['title'], 0)
-            document.add_heading("Author: {}".format(res['author']), 1)
-            document.add_heading("Date Published: {}".format(res['date']), 1)
-            document.add_page_break()
-            p = document.add_paragraph()
-            for para in res['body'].split('\n\n'):
-                document.add_paragraph(para.replace('\n', ''))
-            document.save('export.docx')
-
     def aboutMenu(self):
         messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n""Refer to README for additional info.")
+
+
+class ArticleMenu:
+
+    def __init__(self, window, textbox, n):
+
+        self.article = {"uri":n[0], "title":n[2], "author":n[3], "date":n[4], "body":n[1]}
+        self.tb = textbox
+        topmenu = Menu(window, tearoff=0)
+        window.config(menu=topmenu)
+
+        filemenu = Menu(topmenu, tearoff=0)
+        topmenu.add_cascade(label="File", menu=filemenu)
+
+        exportmenu = Menu(filemenu, tearoff=0)
+        exportmenu.add_command(label="pdf", command=lambda: self.exportarticle("pdf"))
+        exportmenu.add_command(label="docx", command=lambda: self.exportarticle("docx"))
+        filemenu.add_cascade(label="Export", menu=exportmenu)
+
+        settingsmenu = Menu(topmenu, tearoff=0)
+        topmenu.add_cascade(label="Settings", menu=settingsmenu)
+
+        fontsizemenu = Menu(settingsmenu, tearoff=0)
+        fontsizemenu.add_command(label="Default", command=lambda: self.changefontsize(" 14"))
+        fontsizemenu.add_command(label="16", command=lambda: self.changefontsize(" 16"))
+        fontsizemenu.add_command(label="20", command=lambda: self.changefontsize(" 20"))
+        fontsizemenu.add_command(label="24", command=lambda: self.changefontsize(" 24"))
+        fontsizemenu.add_command(label="30", command=lambda: self.changefontsize(" 30"))
+        settingsmenu.add_cascade(label="Change Font Size", menu=fontsizemenu)
+
+        fontnamemenu = Menu(settingsmenu, tearoff=0)
+        fontnamemenu.add_command(label="Times New Roman", command=lambda: self.changefontname("Times "))
+        fontnamemenu.add_command(label="Courier", command=lambda: self.changefontname("Courier "))
+        fontnamemenu.add_command(label="Helvetica", command=lambda: self.changefontname("Helvetica "))
+        settingsmenu.add_cascade(label="Change Font Name", menu=fontnamemenu)
+
+    def exportarticle(self, filetype):
+
+        path = os.path.normpath(os.getcwd() + os.sep + os.pardir + '\Exports\\')
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        currentTime = datetime.datetime.now().strftime("%H_%M_%S")
+
+        defaultfilename = ' '.join(self.article['title'].split()[0:4]) + currentTime
+        filename = filedialog.asksaveasfilename(initialdir=path, initialfile=defaultfilename)
+        path = os.path.join(path, filename)
+
+        if len(filename) > 1:
+            if filetype == 'pdf':
+                style = getSampleStyleSheet()
+                sty = getSampleStyleSheet()['Title']
+                sty.leading = 80
+                pdf = SimpleDocTemplate(path + '.pdf', pagesize=letter)
+
+                fontsize = "40" if (len(self.article['title'])) < 70 else "34"
+                article = []
+                article.append(Spacer(0, inch))
+                article.append(Paragraph("<para fontSize={} spaceAfter=40>{}</para>".format(fontsize, self.article['title']), sty))
+                article.append(
+                    Paragraph("<para fontSize=20 align=center>Author: {}</para>".format(self.article['author']), style['Normal']))
+                article.append(Spacer(0, inch*.35))
+                article.append(
+                    Paragraph("<para fontSize=15 align=center spaceAfter=70>Date Published: {}</para>".format(self.article['date']),
+                              style["Normal"]))
+                article.append(
+                    Paragraph("<para alignment=center><link fontSize=12 textColor=blue "
+                              "href={}><u>{}</u></link></para>".format(self.article['uri'], self.article['uri']), style['Normal']))
+                article.append(PageBreak())
+
+                for para in self.article['body'].split('\n\n'):
+                    article.append(Paragraph(para, style['Normal']))
+                    article.append(Spacer(.25 * inch, .25 * inch))
+                pdf.build(article)
+
+            if filetype == 'docx':
+                document = Document()
+
+                document.add_paragraph('\n\n\n\n')
+
+                p = document.add_paragraph()
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p.paragraph_format.line_spacing = 1.5
+                p = p.add_run(self.article['title'] + '\n')
+                p.font.size = Pt(40) if len(self.article['title']) < 70 else Pt(32)
+                p.font.bold = True
+
+                p = document.add_paragraph()
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p.add_run("Author: {}".format(self.article['author'])). font.size = Pt(20)
+
+                p = document.add_paragraph()
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p.add_run("Date Published: {}\n\n".format(self.article['date'])).font.size = Pt(15)
+
+                p = document.add_paragraph()
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p = p.add_run(self.article['uri'])
+                p.font.color.rgb = RGBColor(0x00,0x00,0xFF)
+                p.font.underline = True
+                document.add_page_break()
+
+                for para in self.article['body'].split('\n\n'):
+                    document.add_paragraph(para.replace('\n', ' '))
+                document.save(path + '.docx')
+
+    def changefontsize(self, fontsize):
+        self.tb.config(font=self.tb.cget('font').split()[0] + fontsize)
+
+    def changefontname(self, fontname):
+        self.tb.config(font=fontname + self.tb.cget('font').split()[1])
