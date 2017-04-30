@@ -351,6 +351,8 @@ class SearchFrame(Frame):
             self.updateuntildata(q, self.searchprogress)
 
             # stop the progress bar
+            self.proglabel.config(text="Populating Results")
+            self.update()
             self.searchprogress.stop()
 
             self.hideshit()
@@ -373,6 +375,7 @@ class SearchFrame(Frame):
             # labels for article topics
             self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
                                     foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
             self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
                                 background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
 
@@ -387,6 +390,7 @@ class SearchFrame(Frame):
 
             self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
                                          background='#282828', foreground='#5DE0DC')
+            calltipwindow.createToolTip(self.topicsHead, "These are the most mentioned phrases in the resulting articles.")
             self.resultTopics = Label(self, text='', wraplength=500, font='times 14',
                                 background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
 
