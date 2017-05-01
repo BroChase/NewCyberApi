@@ -20,12 +20,15 @@ class Analyzer():
         Analyzer.nlp = spacy.load('en')
 
     # main processing algorithm
-    def getMostCommonNounPhrases(self, maxphrases, articles):
+    def getMostCommonNounPhrases(self, maxphrases, articles, stopevent):
         # indiv keeps track of each article phrases, total is for all articles passed in
         indivMostCommon = Counter()
         totalMostCommon = Counter()
         count = 0
         for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=int(len(articles)/8)):
+            if stopevent.is_set():
+                print("breaking")
+                break
             count += 1
             if self.updateque.empty() and len(articles) > 1:
                 self.updateque.put(int(count*100/len(articles)))

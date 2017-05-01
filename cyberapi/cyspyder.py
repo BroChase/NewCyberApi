@@ -67,7 +67,7 @@ class SearchFrame(Frame):
         Frame.__init__(self, parent)
 
         #self.analyzer = analysis.Analyzer(self.updateque)
-
+        self.analysisthread = None
         self.controller = controller  # set the controller
         self.title = "Article Search"  # ttile of the window
 
@@ -77,6 +77,9 @@ class SearchFrame(Frame):
         self.panel = Label(self, image=self.img)
         self.panel.pack()
         self.searchwindow()
+
+        self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
+                                  background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
 
 
 
@@ -326,8 +329,6 @@ class SearchFrame(Frame):
             self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
             self.sf2['relief'] = 'sunken'
 
-            self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
-                                      background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
             self.master.master.updateque.queue.clear()
 
             # start thread to analyze data and repeat process
@@ -447,8 +448,9 @@ class SearchFrame(Frame):
             self.master.master.updateque.queue.clear()
 
             # start thread to analyze data and repeat process
-            analysisthread = ResultsAnalysisThread(self.data, self.master.master.analyzer, q, self.resultTopics)
-            analysisthread.start()
+            self.analysisthread = ResultsAnalysisThread(self.data, self.master.master.analyzer, q, self.resultTopics)
+            self.analysisthread.start()
+
             self.processingloop('percent')
             self.processingloop('dots')
 
@@ -535,10 +537,13 @@ class SearchFrame(Frame):
         self.proglabel.destroy()
 
     def NewSearch(self):
+        self.analysisthread.stopthread()
         self.deletesearch()
         self.searchwindow()
 
+
     def EditSearch(self):
+        self.analysisthread.stopthread()
         self.deletesearch()
         self.undohide()
 
@@ -567,7 +572,7 @@ class SearchFrame(Frame):
         self.topics.destroy()
         self.sf2.destroy()
         self.resultTopicHead.destroy()
-        self.resultTopics.destroy()
+        self.resultTopics.place_forget()
         self.new_search.destroy()
         try:
             self.edit_search.destroy()
@@ -580,7 +585,7 @@ class SearchFrame(Frame):
         self.topicsHead.config(text="Key Article Subjects")
         item = self.tree.item(self.tree.selection()[0], 'values')
         topicStr = '\n\n'.join(['\n'.join(textwrap.wrap('*' + phrase[0], width=33)) for phrase in
-                                self.master.master.analyzer.getMostCommonNounPhrases(5, [item[1]])])
+                                self.master.master.analyzer.getMostCommonNounPhrases(5, [item[1]], threading.Event())])
         self.topics.config(text=topicStr)
 
     #on d click will open the article for display
@@ -784,11 +789,17 @@ class ResultsAnalysisThread(threading.Thread):
         self.data = data
         self.analyzer = analyzer
         self.widget = widget
+        self.stop = threading.Event()
     def run(self):
         results = '\n\n'.join(
             ['\n'.join(textwrap.wrap('*({}): '.format(phrase[1]) + str(phrase[0]), width=33)) for phrase in
-             self.analyzer.getMostCommonNounPhrases(5, [item['body'] for item in self.data])])
-        self.widget.config(text=results)
+             self.analyzer.getMostCommonNounPhrases(5, [item['body'] for item in self.data], self.stop)])
+        try:
+            self.widget.config(text=results)
+        except TclError:
+            pass
+    def stopthread(self):
+        self.stop.set()
 
 if __name__ == "__main__":
     app = cyberapi()
