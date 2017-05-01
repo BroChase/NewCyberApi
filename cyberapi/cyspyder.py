@@ -78,9 +78,33 @@ class SearchFrame(Frame):
         self.panel.pack()
         self.searchwindow()
 
+        # widgets for results page
+        # sunken box that topics print out into
+        self.style = Style()
+        self.style.configure('My.TFrame', background='#383838')
+
+        # frame for individual analysis
+        # self.sf = Frame(self, width=550, height=150, style='My.TFrame')
+        # self.sf['relief'] = 'sunken'
+
+        # frame for results analysis
+        self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
+        self.sf2['relief'] = 'sunken'
+
+        # labels for article topics
+        self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
+                                foreground='#5DE0DC')
+        self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
+                            background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
+        calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
+
+        # labels for results analysis
+        self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
+                                     background='#282828', foreground='#5DE0DC')
         self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
                                   background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
-
+        calltipwindow.createToolTip(self.resultTopicHead,
+                                    "These are the most mentioned phrases in the resulting articles.")
 
 
     #search window populates the window with widgets for searching
@@ -440,11 +464,6 @@ class SearchFrame(Frame):
             self.proglabel.config(text="Analyzing Data...")
             self.update()
 
-            self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
-            self.sf2['relief'] = 'sunken'
-
-            self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
-                                      background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
             self.master.master.updateque.queue.clear()
 
             # start thread to analyze data and repeat process
@@ -465,21 +484,7 @@ class SearchFrame(Frame):
             self.tree.column('#0', stretch=True)
             self.tree.place(relx=.3, relheight=1, relwidth=.7)
 
-            # sunken box that topics print out into
-            self.style = Style()
-            self.style.configure('My.TFrame', background='#383838')
-
-            # frame for individual analysis
-            self.sf = Frame(self, width=550, height=150, style='My.TFrame')
-            self.sf['relief'] = 'sunken'
             self.sf.place(relx=0, rely=.055, relwidth=.3, relheight=.4)
-
-            # labels for article topics
-            self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
-                                    foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
-            self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
-                                background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
 
             self.topicsHead.place(relx=.01, rely=.01, relwidth=.28)
             self.topics.place(relx=.01, rely=.065, relwidth=.28)
@@ -488,9 +493,6 @@ class SearchFrame(Frame):
             # frame for results analysis
             self.sf2.place(relx=0, rely=.51, relwidth=.3, relheight=.4)
 
-            self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
-                                         background='#282828', foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.resultTopicHead, "These are the most mentioned phrases in the resulting articles.")
 
             self.resultTopicHead.place(relx=.01, rely=.465, relwidth=.28)
             self.resultTopics.place(relx=.01, rely=.52, relwidth=.28)
@@ -567,11 +569,11 @@ class SearchFrame(Frame):
     #defind clear search
     def deletesearch(self):
         self.tree.destroy()
-        self.sf.destroy()
-        self.topicsHead.destroy()
-        self.topics.destroy()
-        self.sf2.destroy()
-        self.resultTopicHead.destroy()
+        self.sf.place_forget()
+        self.topicsHead.place_forget()
+        self.topics.place_forget()
+        self.sf2.place_forget()
+        self.resultTopicHead.place_forget()
         self.resultTopics.place_forget()
         self.new_search.destroy()
         try:
