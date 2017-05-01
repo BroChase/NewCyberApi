@@ -21,6 +21,7 @@ import queue
 import calltipwindow
 
 
+
 class cyberapi(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -228,8 +229,8 @@ class SearchFrame(Frame):
             self.fD_beinlab.destroy()
             self.fD_endlab.destroy()
             self.fD_ent2.destroy()
-    # does just that clears some shit bra
-    def clearshit(self):
+    # does just that clears some
+    def clearstuff(self):
         # check to see if the lables and entry boxes exist from a previous search options
         # if they do then destroy them then create the new search label and entry box
         self.ent_keyword.destroy()
@@ -284,7 +285,7 @@ class SearchFrame(Frame):
             self.fD_ent2.place(x=625, y=505+offset)
 
     #hides the widgets to display the search results
-    def hideshit(self):
+    def hidestuff(self):
         self.ent_keyword.place_forget()
         self.check_filter.place_forget()
         self.but_search.place_forget()
@@ -340,7 +341,7 @@ class SearchFrame(Frame):
             # stop the progress bar
             self.searchprogress.stop()
 
-            self.hideshit()
+            self.hidestuff()
             style = Style(self)
             style.configure("Treeview", rowheight=30)
             self.tree = Treeview(self)
@@ -456,7 +457,7 @@ class SearchFrame(Frame):
             # stop the progress bar
             self.searchprogress.stop()
 
-            self.hideshit()
+            self.hidestuff()
             style = Style(self)
             style.configure("Treeview", rowheight=30)
             self.tree = Treeview(self)
@@ -685,7 +686,7 @@ class StartFrame(Frame):
         self.menutree.column('#0', stretch=True)
 
         #Menu Labels
-        self.wl= Label(self, text='WELCOME', width=15, height=2, font='bold')
+        self.wl= Label(self, text='WELCOME', width=15, font='bold')
         self.wl.configure(background='#434343', foreground='#06c8e6')
         self.ns = Label(self, text='-New Session-', width=24, height=1)
         self.ns.configure(height=2, background='#828282', foreground='#06c8e6')
@@ -694,7 +695,7 @@ class StartFrame(Frame):
         self.rs.configure(background='#434343', foreground='#06c8e6')
         #window placements
         self.sf.place(x=298, y=162)
-        self.wl.place(x=315,y=165)
+        self.wl.place(x=310,y=165)
         self.ns.place(x=300, y= 200)
         self.rs.place(x=0, relwidth=.25)
         self.menutree.place(x=0,y=10, relwidth=.25, relheight=.96)
@@ -738,7 +739,7 @@ class StartFrame(Frame):
         self.controller.geometry("%dx%d+%d+%d" % (1100, 700, xoffset, yoffset))  # set geometry of window
         self.controller.show_frame('SearchFrame')
         self.master.master.analyzer.loadSpacy()
-        self.master.master.frames['SearchFrame'].hideshit()
+        self.master.master.frames['SearchFrame'].hidestuff()
         self.master.master.frames['SearchFrame'].oldsearch()
 
     def start(self, event):

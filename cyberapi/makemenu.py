@@ -5,13 +5,10 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
-import requests
-import cyspyder
 import json
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt, RGBColor
-import time
 
 class MainMenu:
     def __init__(self, tkapp):
@@ -54,7 +51,7 @@ class MainMenu:
         with open(path, "r") as fin:
             self.tkapp.set_file(json.load(fin))
         self.tkapp.frames['StartFrame'].start('blah')
-        self.tkapp.frames['SearchFrame'].hideshit()
+        self.tkapp.frames['SearchFrame'].hidestuff()
         self.tkapp.frames['SearchFrame'].oldsearch()
 
         #tesint one two
