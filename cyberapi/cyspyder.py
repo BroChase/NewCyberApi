@@ -573,6 +573,7 @@ class SearchFrame(Frame):
         self.sf2.destroy()
         self.resultTopicHead.destroy()
         self.resultTopics.place_forget()
+        self.new_search.destroy()
         try:
             self.edit_search.destroy()
             self.save_search.destroy()
