@@ -1,9 +1,8 @@
 from collections import Counter
-import spacy
-from difflib import SequenceMatcher
-import time
+
+
 # class to implement spaCy nlp and do text analysis
-class Analyzer():
+class Analyzer:
     nlp = None
 
     def __init__(self, updateque):
@@ -16,16 +15,18 @@ class Analyzer():
 
     # takes a while, allows class to be created and this to be called later
     def loadSpacy(self):
-        import spacy
-        Analyzer.nlp = spacy.load('en')
+        if Analyzer.nlp is None:
+            import spacy
+            Analyzer.nlp = spacy.load('en')
 
     # main processing algorithm
-    def getMostCommonNounPhrases(self, maxphrases, articles, stopevent):
+    def getMostCommonNounPhrases(self, maxphrases, articles, stopevent, returntype):
         # indiv keeps track of each article phrases, total is for all articles passed in
         indivMostCommon = Counter()
         totalMostCommon = Counter()
         count = 0
-        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=int(len(articles)/8)+1):
+        threads = 8 if len(articles) > 50 else 2
+        for doc in Analyzer.nlp.pipe(articles, n_threads=threads, batch_size=int(len(articles)/8)+1):
             if stopevent.is_set():
                 break
             count += 1
@@ -53,7 +54,7 @@ class Analyzer():
                             strippedphrase = (strippedphrase + ' ' + word.text).strip()
 
                 # found a phrase with a proper noun, now make sure it hasn't been added already
-                if foundproper == True:
+                if foundproper:
                     if propphrase in ["US", "U.S.", "United States"]:
                         propphrase = "United States"
                     foundsimilar = False
@@ -75,8 +76,8 @@ class Analyzer():
 
             totalMostCommon.update(unique)
 
-        # handle returning differently based on the amount of articles passed in
-        if len(articles) == 1:
+        # handle returning differently based on argument passed in
+        if returntype == "one":
             return [phrase for phrase in indivMostCommon.most_common(maxphrases)]
         else:
             return [phrase for phrase in totalMostCommon.most_common(maxphrases)]

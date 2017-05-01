@@ -194,6 +194,9 @@ class SearchHelper:
         self.but_search.lift()
         self.check_filter.lift()
 
+        if self.var.get():
+            self.showfilters()
+
     def hidesearch(self):
         self.ent_keyword.lower()
         self.but_search.lower()
