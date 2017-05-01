@@ -5,13 +5,10 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
-import requests
-import cyspyder
 import json
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt, RGBColor
-import time
 
 class MainMenu:
     def __init__(self, tkapp):
@@ -54,8 +51,10 @@ class MainMenu:
         with open(path, "r") as fin:
             self.tkapp.set_file(json.load(fin))
         self.tkapp.frames['StartFrame'].start('blah')
-        self.tkapp.frames['SearchFrame'].hideshit()
+        self.tkapp.frames['SearchFrame'].hidestuff()
         self.tkapp.frames['SearchFrame'].oldsearch()
+
+        #tesint one two
 
 
     def saveMenu(self, saveType):
@@ -67,16 +66,18 @@ class MainMenu:
         if saveType == "Save" and self.saveFilename != None:
             if messagebox.askyesnocancel("Overwrite File?", "Overwrite {}?".format(self.saveFilename)):
                 with open(os.path.join(path, self.saveFilename), 'w') as file:
-                    file.write("Testing file already saved, resaving")
+                    json.dump(self.tkapp.get_file(), file)
+                    #file.write("Testing file already saved, resaving")
         else:
             # get a filename from the user or default to current time
             currentTime = datetime.datetime.now().strftime("%H_%M_%S")
-
             filename = filedialog.asksaveasfilename(defaultextension="txt", initialdir=path, initialfile=currentTime)
             if filename:
                 self.saveFilename = filename
                 with open(filename, 'w') as f:
-                    f.write("Testing Save As/No Current Save")
+                    json.dump(self.tkapp.get_file(), f)
+
+
 
     def aboutMenu(self):
         messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n""Refer to README for additional info.")
