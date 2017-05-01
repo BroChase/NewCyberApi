@@ -87,14 +87,14 @@ class SearchFrame(Frame):
         # labels for article topics
         self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
                                 foreground='#5DE0DC')
-        self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 14',
+        self.topics = Label(self, text='Click on an article to see more info', wraplength=500, font='times 16',
                             background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
         calltipwindow.createToolTip(self.topicsHead, "These are a few subjects that were mentioned in the article")
 
         # labels for results analysis
         self.resultTopicHead = Label(self, text='Most Mentioned Phrases in Results', font="times 16 underline",
                                      background='#282828', foreground='#5DE0DC')
-        self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 14',
+        self.resultTopics = Label(self, text='Processing Data (0%)', wraplength=500, font='times 16',
                                   background='#383838', foreground='#5DE0DC', anchor=W, justify=LEFT)
         calltipwindow.createToolTip(self.resultTopicHead,
                                     "These are the most mentioned phrases in the resulting articles.")
@@ -152,16 +152,27 @@ class SearchFrame(Frame):
             style = Style(self)
             style.configure("Treeview", rowheight=30, fieldbackground='#bdbdbd')
             style.configure("Treeview.Heading", background="#707070", rowheight=60, font="Ariel 14 bold")
-            self.tree = Treeview(self, columns=('date','title'))
+            self.tree = Treeview(self, columns=('date','title'), selectmode='browse')
             self.tree['show'] = 'headings'
 
-            self.tree.column('date', width=1, anchor=CENTER)
+            self.tree.column('date', width=100, anchor=CENTER)
             self.tree.heading('date', text="Date", command = lambda: self.treeview_sort_column(self.tree,'date',False))
-            self.tree.column('title', width=560)
+            self.tree.column('title', width=900)
             self.tree.heading('title', text="Article Title", command = lambda: self.treeview_sort_column(self.tree,
                                                                                                          'title',False))
-            self.tree.place(relx=.3, relheight=1, relwidth=.7)
+            #self.tree.place(relx=.3, relheight=1, width=1200)
+            self.tree.place(x=330, relheight=1, width=760)
 
+            self.treeyscb = Scrollbar(self, orient="vertical", command=self.tree.yview)
+            self.treeyscb.place(relx=1, rely=.5, relheight=1, anchor=E)
+
+            self.tree.configure(yscrollcommand=self.treeyscb.set)
+
+            self.treexscb = Scrollbar(self, orient="horizontal", command=self.tree.xview)
+            self.treexscb.place(relx=.3, rely=.999, width=755, anchor=SW)
+
+
+            self.tree.configure(xscrollcommand=self.treexscb.set)
             self.sf.place(relx=0, rely=.055, relwidth=.30, relheight=.4)
 
             self.topicsHead.place(relx=.01, rely=.024, relwidth=.28, relheight=.03)
@@ -257,6 +268,8 @@ class SearchFrame(Frame):
         self.resultTopicHead.place_forget()
         self.resultTopics.place_forget()
         self.new_search.destroy()
+        self.treexscb.destroy()
+        self.treeyscb.destroy()
         try:
             self.edit_search.destroy()
             self.save_search.destroy()
@@ -267,7 +280,7 @@ class SearchFrame(Frame):
     def on_single_click(self, event):
         self.topicsHead.config(text="Key Article Subjects")
         item = self.tree.item(self.tree.selection()[0], 'values')
-        topicStr = '\n\n'.join(['\n'.join(textwrap.wrap('*' + phrase[0], width=33)) for phrase in
+        topicStr = '\n\n'.join(['\n    '.join(textwrap.wrap('\u27a2' + phrase[0], width=33)) for phrase in
                                 self.master.master.analyzer.getMostCommonNounPhrases(5, [item[4]],
                                                                                      threading.Event(), 'one')])
         self.topics.config(text=topicStr)
@@ -393,8 +406,8 @@ class StartFrame(Frame):
         self.wl.place(relx=.624, rely=.449, relwidth=.31, relheight=.1, anchor=CENTER)
         self.ns.place(relx=.626, rely=.555, relwidth=.31, relheight=.10, anchor=CENTER)
         self.rs.place(x=0, relwidth=.25, relheight=.1)
-        self.menutree.place(x=0,rely=.045, relwidth=.25, relheight=.93)
-        self.progress.place(y=440)
+        self.menutree.place(x=0,rely=.045, relwidth=.25, relheight=.92)
+        self.progress.place(y=435)
 
         self.bytes = 0
         self.maxbytes = 0
@@ -484,7 +497,7 @@ class ResultsAnalysisThread(threading.Thread):
         self.stop = threading.Event()
     def run(self):
         results = '\n\n'.join(
-            ['\n'.join(textwrap.wrap('*({}): '.format(phrase[1]) + str(phrase[0]), width=33)) for phrase in
+            ['\n'.join(textwrap.wrap('\u27a2({}): '.format(phrase[1]) + str(phrase[0]), width=33)) for phrase in
              self.analyzer.getMostCommonNounPhrases(5, [item['body'] for item in self.data], self.stop, 'all')])
         try:
             self.widget.config(text=results)
