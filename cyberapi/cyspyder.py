@@ -50,7 +50,8 @@ class cyberapi(Tk):
 
 
         self.show_frame('StartFrame')
-        #self.show_frame('SearchFrame')
+    def get_file(self):
+        return SearchFrame.content
     def set_file(self, obj):
         SearchFrame.content = obj
     def show_frame(self, page_name):
@@ -430,8 +431,8 @@ class SearchFrame(Frame):
         # wait until thread is done, then get data from queue
         self.updateuntildata(q, self.searchprogress)
         self.data = q.get(0)
-        # else:
-        #     self.data = SearchFrame.content
+        SearchFrame.content = self.data
+
 
         # make sure search didn't time out
         if self.data != "ReadTimeout":
