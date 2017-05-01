@@ -6,16 +6,19 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
 import requests
+import cyspyder
+import json
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt, RGBColor
-
+import time
 
 class MainMenu:
     def __init__(self, tkapp):
         self.tkapp = tkapp
         self.saveFilename = None
-        #self.exportMenu("docx")
+
+
 
     def createMenu(self):
         topmenu = Menu(self.tkapp)
@@ -39,12 +42,20 @@ class MainMenu:
 
     def openMenu(self):
         # set initial directory to savedScans folder
+        try:
+            self.tkapp.frames['SearchFrame'].deletesearch()
+        except AttributeError:
+            pass
+
         path = os.path.join(os.getcwd(), "Sessions")
         if not os.path.exists(path):
             os.makedirs(path)
-        filename = filedialog.askopenfilename(initialdir=path)
-        if os.path.exists(path+filename):
-            self.saveFilename = filename
+        path = filedialog.askopenfilename(initialdir=path)
+        with open(path, "r") as fin:
+            self.tkapp.set_file(json.load(fin))
+        self.tkapp.frames['StartFrame'].start('blah')
+        self.tkapp.frames['SearchFrame'].hideshit()
+        self.tkapp.frames['SearchFrame'].oldsearch()
 
 
     def saveMenu(self, saveType):

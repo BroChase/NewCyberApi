@@ -28,9 +28,9 @@ class cyberapi(Tk):
         #set the frame dimentions and pack the parent window
         container = Frame(self)
         menu = makemenu.MainMenu(self).createMenu()
+
         self.updateque = queue.Queue()
         self.analyzer = analysis.Analyzer(self.updateque)
-
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -48,10 +48,11 @@ class cyberapi(Tk):
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        #self.show_frame("Welcome")          #call show_frame to display the welcome window
+
         self.show_frame('StartFrame')
         #self.show_frame('SearchFrame')
-
+    def set_file(self, obj):
+        SearchFrame.content = obj
     def show_frame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()                     #raise that window frame
@@ -378,7 +379,7 @@ class SearchFrame(Frame):
 
             # New Search Edit Search Save Search
             self.new_search = Button(self, text='New Search', background='#383838', foreground='#5DE0DC',
-                                     font=("Veranda 14"), command=self.NewSearch2)
+                                     font=("Veranda 14"), command=self.NewSearch)
 
 
             for item in self.data:
@@ -533,10 +534,6 @@ class SearchFrame(Frame):
         self.searchprogress.destroy()
         self.proglabel.destroy()
 
-    def NewSearch2(self):
-        self.deleteoldsearch()
-        self.searchwindow()
-
     def NewSearch(self):
         self.deletesearch()
         self.searchwindow()
@@ -572,18 +569,12 @@ class SearchFrame(Frame):
         self.resultTopicHead.destroy()
         self.resultTopics.destroy()
         self.new_search.destroy()
-        self.edit_search.destroy()
-        self.save_search.destroy()
+        try:
+            self.edit_search.destroy()
+            self.save_search.destroy()
+        except AttributeError:
+            return
 
-    def deleteoldsearch(self):
-        self.tree.destroy()
-        self.sf.destroy()
-        self.topicsHead.destroy()
-        self.topics.destroy()
-        self.sf2.destroy()
-        self.resultTopicHead.destroy()
-        self.resultTopics.destroy()
-        self.new_search.destroy()
     #on click gets the articles information and displays it in the Key Article Subjects window
     def on_single_click(self, event):
         self.topicsHead.config(text="Key Article Subjects")
@@ -750,11 +741,13 @@ class StartFrame(Frame):
         self.master.master.frames['SearchFrame'].oldsearch()
 
     def start(self, event):
-        self.progress["value"] = 0
-        self.maxbytes = 50000
-        self.progress["maximum"] = 50000
-        self.after(400, self.master.master.analyzer.loadSpacy)
-        self.read_bytes()
+        if analysis.Analyzer.nlp == None:
+            self.progress["value"] = 0
+            self.maxbytes = 50000
+            self.progress["maximum"] = 50000
+            #analysis.Analyzer.nlp
+            self.master.master.analyzer.loadSpacy()
+            self.read_bytes()
 
     def read_bytes(self):
         '''simulate reading 500 bytes; update progress bar'''
