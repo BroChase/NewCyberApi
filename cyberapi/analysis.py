@@ -25,9 +25,8 @@ class Analyzer():
         indivMostCommon = Counter()
         totalMostCommon = Counter()
         count = 0
-        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=int(len(articles)/8)):
+        for doc in Analyzer.nlp.pipe(articles, n_threads=8, batch_size=int(len(articles)/8)+1):
             if stopevent.is_set():
-                print("breaking")
                 break
             count += 1
             if self.updateque.empty() and len(articles) > 1:

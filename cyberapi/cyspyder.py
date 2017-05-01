@@ -1,13 +1,12 @@
 from tkinter import *
 from tkinter.ttk import Frame
 from tkinter.ttk import Treeview
-from tkinter.ttk import Combobox, Progressbar, Style
+from tkinter.ttk import Progressbar, Style
 from tkinter import filedialog, messagebox
 import json
 import webbrowser
 import unicodedata
 import datetime
-from time import strftime
 import makemenu
 import analysis
 import requests
@@ -19,7 +18,7 @@ import time
 import threading
 import queue
 import calltipwindow
-
+import cyhelper
 
 
 class cyberapi(Tk):
@@ -32,7 +31,8 @@ class cyberapi(Tk):
 
         self.updateque = queue.Queue()
         self.analyzer = analysis.Analyzer(self.updateque)
-        container.pack(side="top", fill="both", expand=True)
+        container.place(relx=.5, rely=.5, relwidth=1, relheight=1, anchor=CENTER)
+        #container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
@@ -65,33 +65,24 @@ class cyberapi(Tk):
 
 class SearchFrame(Frame):
     content = None
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, **kw):
         Frame.__init__(self, parent)
-
-        #self.analyzer = analysis.Analyzer(self.updateque)
         self.analysisthread = None
         self.controller = controller  # set the controller
-        self.title = "Article Search"  # ttile of the window
+        self.title = "Article Search"  # title of the window
 
         #title
         path = os.getcwd() + '\\resources\cyspider.jpg'
         self.img = ImageTk.PhotoImage(Image.open(path))
         self.panel = Label(self, image=self.img)
         self.panel.pack()
-        self.searchwindow()
 
         # widgets for results page
-        # sunken box that topics print out into
-        self.style = Style()
-        self.style.configure('My.TFrame', background='#383838')
-
         # frame for individual analysis
-        # self.sf = Frame(self, width=550, height=150, style='My.TFrame')
-        # self.sf['relief'] = 'sunken'
+        self.sf = LabelFrame(self, width=550, height=150, background='#383838', bd=6)
 
         # frame for results analysis
-        self.sf2 = Frame(self, width=550, height=150, style='My.TFrame')
-        self.sf2['relief'] = 'sunken'
+        self.sf2 = LabelFrame(self, width=550, height=150, background='#383838', bd=6)
 
         # labels for article topics
         self.topicsHead = Label(self, text='Key Article Subjects', font="times 16 underline", background='#282828',
@@ -108,233 +99,11 @@ class SearchFrame(Frame):
         calltipwindow.createToolTip(self.resultTopicHead,
                                     "These are the most mentioned phrases in the resulting articles.")
 
+        # helper class to improve code readability
+        self.helper = cyhelper.SearchHelper(self)
 
-    #search window populates the window with widgets for searching
-    def searchwindow(self):
-        #keyword entry
-        self.largefont = ('Veranda', 24)
-        self.ent_keyword = Entry(self, width=40, relief='raised', font=self.largefont, bd=1)
-        #todo <Return> and entry is not empty call search()
+        self.helper.showsearch()
 
-        calltipwindow.createToolTip(self.ent_keyword, "Enter a word or phrase here to search by.")
-        self.ent_keyword.bind('<Escape>', self.clear_text)
-        self.ent_keyword.bind('<Key>', lambda event: self.callEnable(event, 'DefaultSearch'))
-
-        self.var = IntVar()
-        self.var.set(0)
-        self.check_filter = Checkbutton(self, text="Advanced Filter", onvalue=1, offvalue=0, variable=self.var, command=self.filter_op, font="Veranda 16")
-        calltipwindow.createToolTip(self.check_filter, "Click here for options to narrow your search")
-
-        if not self.var.get():
-            self.but_search = Button(self, text='Search', width=15, state='disable', font="Veranda 16", command=lambda: self.search(
-                'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitlebody&title='
-                + self.ent_keyword.get() + '&body=' + self.ent_keyword.get()))
-            self.but_search.place(relx=.505, rely=.6, anchor=W)
-        else:
-            self.searchButton()
-
-        #window placements
-        #ENTRY BOX for keyword
-        self.ent_keyword.place(relx=.5, rely=.5, anchor=CENTER)
-
-        #check button
-        self.check_filter.place(relx=.495, rely=.6, relheight=.059, anchor=E)
-    #todo if the user selects to load a search it will simply jump to results
-
-    def searchButton(self,event):
-        if self.box.current() is 0:
-            self.but_search.config(command=lambda: self.search(
-                'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitlebody&title='
-                + self.ent_keyword.get() + '&body=' + self.ent_keyword.get()))
-        elif self.box.current() is 1:
-            self.but_search.config(command=lambda: self.search(
-                'http://cbrown686-test.apigee.net/cyberapi/articles?q=keywordtitle&title=' + self.ent_keyword.get()))
-        elif self.box.current() is 2:
-            self.but_search.config(command=lambda: self.search(
-                'http://cbrown686-test.apigee.net/cyberapi/articles?q=bodyonly&body=' + self.ent_keyword.get()))
-        elif self.box.current() is 3:
-            self.but_search.config(command=lambda: self.search(
-                'http://cbrown686-test.apigee.net/cyberapi/articles?q=uri&uripath='+ self.ent_keyword.get()))
-
-        self.enableSearch2()
-
-    #Hitting escape when editing the ENTRY box will clear it and disable the search button from being able to be used.
-    def clear_text(self, event):
-        self.ent_keyword.delete(0, 'end')
-        self.but_search.configure(state='disable')
-    #filter options populate uppon check box of Advanced search option
-    def filter_op(self):
-        if self.var.get() is 1:
-            #appearing
-            self.appearing_label = Label(self, text='Appearing In:', background='#282828', font=15, foreground='#5DE0DC')
-            self.box_value = StringVar()
-            self.box = Combobox(self, textvariable=self.box_value)
-            calltipwindow.createToolTip(self.appearing_label, "Select where you want us to search "
-                                                              "for your provided search phrase.")
-            calltipwindow.createToolTip(self.box, "Select where you want us to search "
-                                                              "for your provided search phrase.")
-            self.box['values'] = ('Default', 'Title', 'Body', 'URL')
-            self.box.current(0)
-            self.box.bind('<<ComboboxSelected>>', self.searchButton)
-            #author
-            self.author_label = Label(self, text='Author:',background='#282828', font=15, foreground='#5DE0DC')
-            self.author_entry = Entry(self, width=22, bd=2, background='#9A9A9A')
-            calltipwindow.createToolTip(self.author_label,
-                                        "Enter an author's first and/or last name (not case-sensitive).")
-            calltipwindow.createToolTip(self.author_entry,
-                                        "Enter an author's first and/or last name (not case-sensitive).")
-            #subjectivity
-            self.fsub_label = Label(self, text='Subjectivity:',background='#282828', font=15, foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.fsub_label, "Choose an option here if you only want to see articles"
-                                                              " that are more objectively or subjectively written")
-            self.var2 = IntVar()
-            self.var2.set(1)
-            self.fsub_nv = Radiobutton(self, text="Don't Care", variable=self.var2, value=1, background='#282828', foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.fsub_nv, "Select this if you want all articles returned regarless of how they are written.")
-            self.fsub_gt = Radiobutton(self, text='More Subjective', variable=self.var2, value=2, background='#282828', foreground='#5DE0DC')
-            calltipwindow.createToolTip(self.fsub_gt, "Select this if you only want articles that are more subjectively written.")
-            self.fsub_lt = Radiobutton(self, text='More Objective', variable=self.var2, value=3, background='#282828', foreground='#5DE0DC')
-
-            calltipwindow.createToolTip(self.fsub_lt, "Select this if you only want articles that are more objectively written.")
-            #date
-            self.fD_label = Label(self, text='Date:',background='#282828', font=15, foreground='#5DE0DC')
-            self.fD_format = Label(self, text='00/00/0000', background='#282828',foreground='#BBBBBB')
-            self.fD_format.configure(foreground='grey')
-            self.fD_beinlab = Label(self, text='From:',background='#282828', foreground='#BBBBBB')
-            self.fD_endlab = Label(self, text='To:',background='#282828', foreground='#BBBBBB')
-            self.fD_ent = Entry(self, width=10, bd=2, background='#9A9A9A')
-            self.fD_ent.insert('end', '01/01/0001')
-            self.fD_ent2 = Entry(self, width=10, bd=2, background='#9A9A9A')
-            self.fD_ent2.insert('end', strftime('%m/%d/%Y'))
-
-            calltipwindow.createToolTip(self.fD_label, "Narrow your results to articles published in the dates here.")
-            calltipwindow.createToolTip(self.fD_format, "Narrow your results to articles published in the dates here.")
-            calltipwindow.createToolTip(self.fD_beinlab, "Narrow your results to articles published in the dates here.")
-            calltipwindow.createToolTip(self.fD_endlab, "Narrow your results to articles published in the dates here.")
-            calltipwindow.createToolTip(self.fD_ent, "Enter Start Date here.")
-            calltipwindow.createToolTip(self.fD_ent2, "Enter End Date here.")
-
-
-
-        # window placements
-            #appearing labael
-            offset=100
-            self.appearing_label.place(x=400, y=380+offset)
-            #appearing pick
-            self.box.place(x=510, y=380+offset)
-            #author label
-            self.author_label.place(x=400, y=405+offset)
-            #author entry
-            self.author_entry.place(x=510, y=405+offset)
-            #subjectivity
-            self.fsub_label.place(x=400, y=430+offset)
-            self.fsub_nv.place(x=510, y=430+offset)
-            self.fsub_gt.place(x=510, y=455+offset)
-            self.fsub_lt.place(x=510, y=480+offset)
-
-            #date
-            self.fD_label.place(x=400, y=505+offset)
-            self.fD_format.place(x=440, y=507+offset)
-            self.fD_beinlab.place(x=510, y=505+offset)
-            self.fD_ent.place(x=555, y=505+offset)
-            self.fD_endlab.place(x=590, y=505+offset)
-            self.fD_ent2.place(x=625, y=505+offset)
-
-            # if the button gets unchecked it will destroy the labels and entry widgets.
-        elif self.var.get() is 0:
-            self.appearing_label.destroy()
-            self.box.destroy()
-            self.author_label.destroy()
-            self.author_entry.destroy()
-            self.fsub_label.destroy()
-            self.fsub_nv.destroy()
-            self.fsub_gt.destroy()
-            self.fsub_lt.destroy()
-            self.fD_label.destroy()
-            self.fD_format.destroy()
-            self.fD_ent.destroy()
-            self.fD_beinlab.destroy()
-            self.fD_endlab.destroy()
-            self.fD_ent2.destroy()
-    # does just that clears some
-    def clearstuff(self):
-        # check to see if the lables and entry boxes exist from a previous search options
-        # if they do then destroy them then create the new search label and entry box
-        self.ent_keyword.destroy()
-        self.check_filter.destroy()
-        self.but_search.destroy()
-        if hasattr(self, 'appearing_label'):
-            # self.ent_keyword.destroy()
-            # self.check_filter.destroy()
-            # self.but_search.destroy()
-            self.appearing_label.destroy()
-            self.box.destroy()
-            self.author_label.destroy()
-            self.author_entry.destroy()
-            self.fsub_label.destroy()
-            self.fsub_nv.destroy()
-            self.fsub_gt.destroy()
-            self.fsub_lt.destroy()
-            self.fD_label.destroy()
-            self.fD_format.destroy()
-            self.fD_ent.destroy()
-            self.fD_beinlab.destroy()
-            self.fD_endlab.destroy()
-            self.fD_ent2.destroy()
-    #undoes the hide of the seach buttons so that they can edit the search
-    def undohide(self):
-        self.ent_keyword.place(relx=.5, rely=.5, anchor=CENTER)
-        self.check_filter.place(relx=.495, rely=.6, relheight=.059, anchor=E)
-        self.but_search.place(relx=.505, rely=.6, anchor=W)
-        if self.var.get() == 1:
-            # window placements
-            # appearing labael
-            offset = 100
-            self.appearing_label.place(x=400, y=380+offset)
-            # appearing pick
-            self.box.place(x=510, y=380+offset)
-            # author label
-            self.author_label.place(x=400, y=405+offset)
-            # author entry
-            self.author_entry.place(x=510, y=405+offset)
-            # subjectivity
-            self.fsub_label.place(x=400, y=430+offset)
-            self.fsub_nv.place(x=510, y=430+offset)
-            self.fsub_gt.place(x=510, y=455+offset)
-            self.fsub_lt.place(x=510, y=480+offset)
-
-            # date
-            self.fD_label.place(x=400, y=505+offset)
-            self.fD_format.place(x=440, y=507+offset)
-            self.fD_beinlab.place(x=510, y=505+offset)
-            self.fD_ent.place(x=555, y=505+offset)
-            self.fD_endlab.place(x=590, y=505+offset)
-            self.fD_ent2.place(x=625, y=505+offset)
-
-    #hides the widgets to display the search results
-    def hidestuff(self):
-        self.ent_keyword.place_forget()
-        self.check_filter.place_forget()
-        self.but_search.place_forget()
-        if self.var.get() == 1:
-            # self.ent_keyword.place(x=(-100), y=(-100))
-            # self.check_filter.place(x=(-100), y=(-100))
-            # self.but_search.place(x=(-100), y=(-100))
-            self.appearing_label.place(x=(-100), y=(-100))
-            self.box.place(x=(-100), y=(-100))
-            self.author_label.place(x=(-100), y=(-100))
-            self.author_entry.place(x=(-100), y=(-100))
-            self.fsub_label.place(x=(-100), y=(-100))
-            self.fsub_nv.place(x=(-100), y=(-100))
-            self.fsub_gt.place(x=(-100), y=(-100))
-            self.fsub_lt.place(x=(-100), y=(-100))
-            self.fD_label.place(x=(-100), y=(-100))
-            self.fD_format.place(x=(-100), y=(-100))
-            self.fD_ent.place(x=(-100), y=(-100))
-            self.fD_beinlab.place(x=(-100), y=(-100))
-            self.fD_endlab.place(x=(-100), y=(-100))
-            self.fD_ent2.place(x=(-100), y=(-100))
-    # adding comment
     #search for that almighty data mine.
     def oldsearch(self):
         self.searchprogress = Progressbar(self, orient="horizontal", style='mongo.Horizontal.TProgressbar', length=700,
@@ -366,7 +135,7 @@ class SearchFrame(Frame):
             # stop the progress bar
             self.searchprogress.stop()
 
-            self.hidestuff()
+            self.helper.hidesearch()
             style = Style(self)
             style.configure("Treeview", rowheight=30)
             self.tree = Treeview(self)
@@ -432,24 +201,12 @@ class SearchFrame(Frame):
         self.proglabel = Label(self, text="Fetching Results...", font="Times 14", bg="#282828", fg="#FFFFFF")
         self.proglabel.place(relx=.5, rely=.765, anchor=CENTER)
 
-        if self.var.get():
-            au = self.author_entry.get()
-            au = au.replace(' ', '+')
-            # var2 is the state of the radio check button
-            if self.var2.get() == 2:
-                url = url + '&author=' + au + '&sub=gt&sdate=' + self.fD_ent.get() + '&edate=' + self.fD_ent2.get()
-                # print(url)
-            elif self.var2.get() == 3:
-                url = url + '&author=' + au + '&sub=gt&sdate=' + self.fD_ent.get() + '&edate=' + self.fD_ent2.get()
-            else:
-                url = url + '&author=' + au + '&sub=&sdate=' + self.fD_ent.get() + '&edate=' + self.fD_ent2.get()
-        else:
-            url = url + '&author=&sub=&sdate=01/01/0001&edate=' + strftime('%m/%d/%Y')
+        # get additional info from filters if they exist
+        url = self.helper.addurlfilters(url)
 
         # queue to share between gui and threads
         q = queue.Queue()
 
-        #if SearchFrame.content == None:
         # start thread to get data from url
         thread = GetDataThread(url, q)
         thread.start()
@@ -462,10 +219,6 @@ class SearchFrame(Frame):
 
         # make sure search didn't time out
         if self.data != "ReadTimeout":
-            # change label info to next task
-            self.proglabel.config(text="Analyzing Data...")
-            self.update()
-
             self.master.master.updateque.queue.clear()
 
             # start thread to analyze data and repeat process
@@ -478,7 +231,8 @@ class SearchFrame(Frame):
             # stop the progress bar
             self.searchprogress.stop()
 
-            self.hidestuff()
+            self.helper.hidesearch()
+
             style = Style(self)
             style.configure("Treeview", rowheight=30)
             self.tree = Treeview(self)
@@ -486,14 +240,14 @@ class SearchFrame(Frame):
             self.tree.column('#0', stretch=True)
             self.tree.place(relx=.3, relheight=1, relwidth=.7)
 
-            self.sf.place(relx=0, rely=.055, relwidth=.3, relheight=.4)
+            self.sf.place(relx=0, rely=.055, relwidth=.30, relheight=.4)
 
             self.topicsHead.place(relx=.01, rely=.01, relwidth=.28)
             self.topics.place(relx=.01, rely=.065, relwidth=.28)
 
 
             # frame for results analysis
-            self.sf2.place(relx=0, rely=.51, relwidth=.3, relheight=.4)
+            self.sf2.place(relx=0, rely=.51, relwidth=.30, relheight=.4)
 
 
             self.resultTopicHead.place(relx=.01, rely=.465, relwidth=.28)
@@ -535,7 +289,7 @@ class SearchFrame(Frame):
 
         else:
             messagebox.showerror("Too Broad", "Search is too broad. Try refining with filters.")
-            self.ent_keyword.focus_set()
+            self.helper.ent_keyword.focus_set()
 
         self.searchprogress.destroy()
         self.proglabel.destroy()
@@ -543,13 +297,14 @@ class SearchFrame(Frame):
     def NewSearch(self):
         self.analysisthread.stopthread()
         self.deletesearch()
-        self.searchwindow()
+        self.helper.resetsearch()
+        self.helper.showsearch()
 
 
     def EditSearch(self):
         self.analysisthread.stopthread()
         self.deletesearch()
-        self.undohide()
+        self.helper.showsearch()
 
     def saveMenu(self):
         # create main directory and subdir(current date) if not made already
@@ -582,7 +337,7 @@ class SearchFrame(Frame):
             self.edit_search.destroy()
             self.save_search.destroy()
         except AttributeError:
-            return
+            pass
 
     #on click gets the articles information and displays it in the Key Article Subjects window
     def on_single_click(self, event):
@@ -622,25 +377,10 @@ class SearchFrame(Frame):
     def op_link(self, event):
         webbrowser.open_new(self.n[0])
 
-    def callEnable(self, event, searchType):
-        self.after(100, lambda: self.enableSearch(event, searchType))
+    def callEnable(self, event, searchtype):
+        self.helper.callenable(event, searchtype)
 
-    # event bind when Return is entered after a title keyword is entered will enable the search button.
-    def enableSearch(self, event, searchType):
-        string = ''
-        if searchType == 'DefaultSearch':
-            string = self.ent_keyword.get()
-        if string.strip() != '':
-            self.but_search.configure(state='normal')
-        else:
-            self.but_search.configure(state='disabled')
-    # check for when no event bind is present to be used to pass in and no need for searchType
-    def enableSearch2(self):
-        string = self.ent_keyword.get()
-        if string.strip() != '':
-            self.but_search.configure(state='normal')
-        else:
-            self.but_search.configure(state='disabled')
+
 
     def updateuntildata(self, q, progress):
         while q.empty():
@@ -665,9 +405,8 @@ class SearchFrame(Frame):
         self.resultTopics.config(text=string)
 
 class StartFrame(Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, **kw):
         Frame.__init__(self, parent)
-        #container = Frame(self)
         self.controller = controller  # set the controller
         self.title = "CySpyder"              #ttile of the window
         path = os.getcwd() + '\\resources\spiderweb2.jpg'
@@ -746,7 +485,7 @@ class StartFrame(Frame):
         self.controller.geometry("%dx%d+%d+%d" % (1100, 700, xoffset, yoffset))  # set geometry of window
         self.controller.show_frame('SearchFrame')
         self.master.master.analyzer.loadSpacy()
-        self.master.master.frames['SearchFrame'].hidestuff()
+        self.master.master.frames['SearchFrame'].helper.hidesearch()
         self.master.master.frames['SearchFrame'].oldsearch()
 
     def start(self, event):
