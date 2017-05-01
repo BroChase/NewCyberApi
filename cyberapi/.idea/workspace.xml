@@ -11,7 +11,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/cyberapi$cyspyder.coverage" NAME="cyspyder Coverage Results" MODIFIED="1493603176377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/cyberapi$cyspyder.coverage" NAME="cyspyder Coverage Results" MODIFIED="1493614252629" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/cyberapi$urltesting.coverage" NAME="urltesting Coverage Results" MODIFIED="1493279165987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/cyberapi$uri.coverage" NAME="uri Coverage Results" MODIFIED="1492928389650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/cyber-api$urltesting.coverage" NAME="urltesting Coverage Results" MODIFIED="1493153004985" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -35,30 +35,44 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="makemenu.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/makemenu.py">
+      <file leaf-file-name="cyspyder.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cyspyder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="58" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
+            <state relative-caret-position="1019">
+              <caret line="434" column="0" lean-forward="true" selection-start-line="434" selection-start-column="0" selection-end-line="434" selection-end-column="0" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#3169#4878#0" expanded="false" />
+                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#2231#2671#0" expanded="false" />
+                <element signature="e#2778#4223#0" expanded="false" />
+                <element signature="e#4345#5287#0" expanded="false" />
+                <element signature="e#5449#5533#0" expanded="false" />
+                <element signature="e#5638#11252#0" expanded="false" />
+                <element signature="e#11323#12282#0" expanded="false" />
+                <element signature="e#12385#13586#0" expanded="false" />
+                <element signature="e#13667#14724#0" expanded="false" />
+                <element signature="e#14815#19599#0" expanded="false" />
+                <element signature="e#31601#36495#0" expanded="false" />
+                <element signature="e#33684#34804#0" expanded="false" />
+                <element signature="e#34848#35538#0" expanded="false" />
+                <element signature="e#35576#35844#0" expanded="false" />
+                <element signature="e#35880#36180#0" expanded="false" />
+                <element signature="e#36540#36896#0" expanded="false" />
+                <element signature="e#36949#37439#0" expanded="false" />
+                <element signature="e#37472#37507#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cyspyder.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cyspyder.py">
+      <file leaf-file-name="makemenu.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/makemenu.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="530">
-              <caret line="535" column="0" lean-forward="true" selection-start-line="535" selection-start-column="0" selection-end-line="535" selection-end-column="0" />
+            <state relative-caret-position="306">
+              <caret line="65" column="36" lean-forward="true" selection-start-line="65" selection-start-column="36" selection-end-line="65" selection-end-column="36" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
-                <element signature="e#31603#36497#0" expanded="false" />
-                <element signature="e#36542#36898#0" expanded="false" />
-                <element signature="e#36951#37441#0" expanded="false" />
-                <element signature="e#37474#37509#0" expanded="false" />
+                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#3199#8529#0" expanded="false" />
+                <element signature="e#3248#4957#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -129,7 +143,6 @@
     </navigator>
     <panes>
       <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -144,11 +157,12 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="settings.github" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
     <property name="js.eslint.eslintPackage" value="" />
@@ -623,7 +637,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="31" lean-forward="true" selection-start-line="4" selection-start-column="31" selection-end-line="4" selection-end-column="31" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -631,31 +644,44 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
           <caret line="19" column="39" lean-forward="true" selection-start-line="19" selection-start-column="8" selection-end-line="19" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cyspyder.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="530">
-          <caret line="535" column="0" lean-forward="true" selection-start-line="535" selection-start-column="0" selection-end-line="535" selection-end-column="0" />
+        <state relative-caret-position="1019">
+          <caret line="434" column="0" lean-forward="true" selection-start-line="434" selection-start-column="0" selection-end-line="434" selection-end-column="0" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <element signature="e#31603#36497#0" expanded="false" />
-            <element signature="e#36542#36898#0" expanded="false" />
-            <element signature="e#36951#37441#0" expanded="false" />
-            <element signature="e#37474#37509#0" expanded="false" />
+            <element signature="e#2231#2671#0" expanded="false" />
+            <element signature="e#2778#4223#0" expanded="false" />
+            <element signature="e#4345#5287#0" expanded="false" />
+            <element signature="e#5449#5533#0" expanded="false" />
+            <element signature="e#5638#11252#0" expanded="false" />
+            <element signature="e#11323#12282#0" expanded="false" />
+            <element signature="e#12385#13586#0" expanded="false" />
+            <element signature="e#13667#14724#0" expanded="false" />
+            <element signature="e#14815#19599#0" expanded="false" />
+            <element signature="e#31601#36495#0" expanded="false" />
+            <element signature="e#33684#34804#0" expanded="false" />
+            <element signature="e#34848#35538#0" expanded="false" />
+            <element signature="e#35576#35844#0" expanded="false" />
+            <element signature="e#35880#36180#0" expanded="false" />
+            <element signature="e#36540#36896#0" expanded="false" />
+            <element signature="e#36949#37439#0" expanded="false" />
+            <element signature="e#37472#37507#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/makemenu.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="58" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
+        <state relative-caret-position="306">
+          <caret line="65" column="36" lean-forward="true" selection-start-line="65" selection-start-column="36" selection-end-line="65" selection-end-column="36" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#3169#4878#0" expanded="false" />
+            <element signature="e#3199#8529#0" expanded="false" />
+            <element signature="e#3248#4957#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -57,6 +57,8 @@ class MainMenu:
         self.tkapp.frames['SearchFrame'].hideshit()
         self.tkapp.frames['SearchFrame'].oldsearch()
 
+        #tesint one two
+
 
     def saveMenu(self, saveType):
         # create main directory and subdir(current date) if not made already
@@ -67,16 +69,18 @@ class MainMenu:
         if saveType == "Save" and self.saveFilename != None:
             if messagebox.askyesnocancel("Overwrite File?", "Overwrite {}?".format(self.saveFilename)):
                 with open(os.path.join(path, self.saveFilename), 'w') as file:
-                    file.write("Testing file already saved, resaving")
+                    json.dump(self.tkapp.get_file(), file)
+                    #file.write("Testing file already saved, resaving")
         else:
             # get a filename from the user or default to current time
             currentTime = datetime.datetime.now().strftime("%H_%M_%S")
-
             filename = filedialog.asksaveasfilename(defaultextension="txt", initialdir=path, initialfile=currentTime)
             if filename:
                 self.saveFilename = filename
                 with open(filename, 'w') as f:
-                    f.write("Testing Save As/No Current Save")
+                    json.dump(self.tkapp.get_file(), f)
+
+
 
     def aboutMenu(self):
         messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n""Refer to README for additional info.")
