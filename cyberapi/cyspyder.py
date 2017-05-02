@@ -158,8 +158,9 @@ class SearchFrame(Frame):
             self.tree.column('date', width=100, anchor=CENTER)
             self.tree.heading('date', text="Date", command = lambda: self.treeview_sort_column(self.tree,'date',False))
             self.tree.column('title', width=900)
-            self.tree.heading('title', text="Article Title", command = lambda: self.treeview_sort_column(self.tree,
-                                                                                                         'title',False))
+            self.tree.heading('title', text="Article Title", anchor=W,
+                              command = lambda: self.treeview_sort_column(self.tree,'title',False))
+
             #self.tree.place(relx=.3, relheight=1, width=1200)
             self.tree.place(x=330, relheight=1, width=760)
 
@@ -317,7 +318,7 @@ class SearchFrame(Frame):
         articledate.pack(side=RIGHT, anchor='se')
     # op_link "double click on the link at the top of the page opens up the url link
     def op_link(self, event):
-        webbrowser.open_new(self.n[0])
+        webbrowser.open_new(self.n[2])
 
     def callEnable(self, event, searchtype):
         self.helper.callenable(event, searchtype)
@@ -402,9 +403,9 @@ class StartFrame(Frame):
         self.rs.configure(background='#434343', foreground='#06c8e6')
 
         #window placements
-        self.sf.place(relx=.625, rely=.5, relwidth=.32, relheight=.22, anchor=CENTER)
-        self.wl.place(relx=.624, rely=.449, relwidth=.31, relheight=.1, anchor=CENTER)
-        self.ns.place(relx=.626, rely=.555, relwidth=.31, relheight=.10, anchor=CENTER)
+        self.sf.place(relx=.625, rely=.5, relwidth=.26, relheight=.22, anchor=CENTER)
+        self.wl.place(relx=.624, rely=.449, relwidth=.25, relheight=.1, anchor=CENTER)
+        self.ns.place(relx=.626, rely=.555, relwidth=.25, relheight=.10, anchor=CENTER)
         self.rs.place(x=0, relwidth=.25, relheight=.1)
         self.menutree.place(x=0,rely=.045, relwidth=.25, relheight=.92)
         self.progress.place(y=435)
