@@ -46,11 +46,15 @@ class MainMenu:
         if not os.path.exists(path):
             os.makedirs(path)
         path = filedialog.askopenfilename(initialdir=path)
-        with open(path, "r") as fin:
-            self.tkapp.set_file(json.load(fin))
+        try:
+            with open(path, "r") as fin:
+                self.tkapp.set_file(json.load(fin))
 
-        self.tkapp.frames['SearchFrame'].helper.hidesearch()
-        self.tkapp.frames['StartFrame'].start('open file')
+            self.tkapp.frames['SearchFrame'].helper.hidesearch()
+            self.tkapp.frames['StartFrame'].start('open file')
+
+        except FileNotFoundError:
+            pass
 
     def saveMenu(self, saveType):
         # create main directory and subdir(current date) if not made already
