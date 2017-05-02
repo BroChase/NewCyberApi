@@ -15,8 +15,6 @@ class MainMenu:
         self.tkapp = tkapp
         self.saveFilename = None
 
-
-
     def createMenu(self):
         topmenu = Menu(self.tkapp)
 
@@ -48,14 +46,15 @@ class MainMenu:
         if not os.path.exists(path):
             os.makedirs(path)
         path = filedialog.askopenfilename(initialdir=path)
-        with open(path, "r") as fin:
-            self.tkapp.set_file(json.load(fin))
-        self.tkapp.frames['StartFrame'].start('blah')
-        self.tkapp.frames['SearchFrame'].hidestuff()
-        self.tkapp.frames['SearchFrame'].oldsearch()
+        try:
+            with open(path, "r") as fin:
+                self.tkapp.set_file(json.load(fin))
 
-        #tesint one two
+            self.tkapp.frames['SearchFrame'].helper.hidesearch()
+            self.tkapp.frames['StartFrame'].start('open file')
 
+        except FileNotFoundError:
+            pass
 
     def saveMenu(self, saveType):
         # create main directory and subdir(current date) if not made already
@@ -63,11 +62,10 @@ class MainMenu:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        if saveType == "Save" and self.saveFilename != None:
+        if saveType == "Save" and self.saveFilename is not None:
             if messagebox.askyesnocancel("Overwrite File?", "Overwrite {}?".format(self.saveFilename)):
                 with open(os.path.join(path, self.saveFilename), 'w') as file:
                     json.dump(self.tkapp.get_file(), file)
-                    #file.write("Testing file already saved, resaving")
         else:
             # get a filename from the user or default to current time
             currentTime = datetime.datetime.now().strftime("%H_%M_%S")
@@ -77,8 +75,6 @@ class MainMenu:
                 with open(filename, 'w') as f:
                     json.dump(self.tkapp.get_file(), f)
 
-
-
     def aboutMenu(self):
         messagebox.showinfo("About", "Developed by: Chase Brown and Joseph Dodson\n""Refer to README for additional info.")
 
@@ -87,7 +83,7 @@ class ArticleMenu:
 
     def __init__(self, window, textbox, n):
 
-        self.article = {"uri":n[0], "title":n[2], "author":n[3], "date":n[4], "body":n[1]}
+        self.article = {"uri":n[2], "title":n[1], "author":n[3], "date":n[0], "body":n[4]}
         self.tb = textbox
         topmenu = Menu(window, tearoff=0)
         window.config(menu=topmenu)
